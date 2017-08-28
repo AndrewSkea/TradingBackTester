@@ -39,18 +39,19 @@ class HistDBHandler(DBHandler):
         :return: null
         """
         # Sets the select string statement so that it gets the current time and the prices from histdata table
-        _select_string = 'SELECT close_prices FROM histdata'
+        _select_string = 'SELECT * FROM histdata'
         return self.execute(_select_string, enums.StatementType.SELECT)
 
 
     def get_all_data(self, amount=250000):
         # Set select string for getting all data from the database
-        _select_string = 'SELECT close_prices FROM histdata LIMIT {}'.format(amount)
+        _select_string = 'SELECT * FROM all_past_data LIMIT {}'.format(amount)
         # Get data from execute function
-        _query_result = self.execute(string=_select_string, statement_type=enums.StatementType.SELECT)
-        # Initialise aan empty array to hold the final array of data
-        _prices_array = []
-        # This is the final array that contains only the values
-        [_prices_array.append(float(_query_result[i][0])) for i in range(len(_query_result))]
-        # return the array with just numbers (This is done because it is formatted as [(1.8328239,),(1.8328239,),...]
-        return _prices_array
+        return self.execute(string=_select_string, statement_type=enums.StatementType.SELECT)
+
+    def get_all_pattern_data(self, amount=250000):
+        # Set select string for getting all data from the database
+        _select_string = 'SELECT * FROM pattern_data LIMIT {}'.format(amount)
+        # Get data from execute function
+        return self.execute(string=_select_string, statement_type=enums.StatementType.SELECT)
+

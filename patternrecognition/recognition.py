@@ -1,122 +1,116 @@
 import time
+import enums
 from iqoption import iqapi
-from constants import constants
 from methods import percentage_change
 from databases import LogHandler
 
 
 class PatternRecognition:
-    def __init__(self, array_data_tuple):
+    def __init__(self, _data_array_tuple, _patterns_array_tuple, constants_class):
         """
         This initialises all the data that is needed in this class
         :param array_data_tuple: 
         """
+        self.constants = constants_class
+        array_data_tuple = _data_array_tuple
+        self.pattern_data_tuples = _patterns_array_tuple
         # Creates an instance of the iq options api class of this project
         self.api = iqapi.IQOptionApi()
-
         # This is the array that has the historic data patterns that end up buying
-        self._buy_pattern_array = array_data_tuple[0]
+        self._pattern_array = array_data_tuple[0]
         # This is the buy performance array which is the pattern's outcome (same index as pattern)
-        self._buy_performance_array = array_data_tuple[1]
+        self._performance_array = array_data_tuple[1]
         # This is the array that has the historic data patterns that end up selling
-        self._sell_pattern_array = array_data_tuple[2]
+        self._time = array_data_tuple[2]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._sell_performance_array = array_data_tuple[3]
-        # Creates an empty global array for the current pattern
-        self._current_pattern = []
-        # Creates a ray pattern that fills up just with data so it can be used again and under the length limit
-        self.current_raw_pattern = []
-        # This will be the number of trades this program does (not what IQOptions will record necessarily)
-        self._num_bets = 0
+        self._high = array_data_tuple[3]
+        # This is the sell performance array which is the pattern's outcome (same index as pattern)
+        self._low = array_data_tuple[4]
+        # This is the sell performance array which is the pattern's outcome (same index as pattern)
+        self._close = array_data_tuple[5]
         # Instance of Log handler
         self._log_handler = LogHandler()
+        # Number of bets
+        self._num_bets = 0
 
-    def analyse_pattern(self, data_array, performance_array):
+    def analyse_pattern(self, pattern):
         """
         This function goes through all the data in the arrays and returns the amount of similar patterns
-        :param data_array: This is the array that has all the historic data either resulting in a buy or sell
-        :param performance_array: This is the equivalent performance array (outcome)
         :return: returns the predicted outcomes array which holds all the outcomes from the similar patterns
         """
         # This is the array of predicted outcomes from all the patterns
         _predicted_outcomes_array = []
         # iterates through the historic data array to find similar patterns
-        for b in range(len(data_array)):
+        for b in range(len(self._pattern_array)):
             # Uses a should skip boolean to check whether to skip the current pattern completely
             _should_skip = False
             # Gets the pattern that it will use
-            _each_pattern = data_array[b]
+            _each_pattern = self._pattern_array[b]
             # Goes through the pattern and sees if each percentage change is within the right limit, else continue
-            for i in range(0, constants.length_of_pattern - 1, 1):
-                if abs(percentage_change.percent_change(_each_pattern[i], self._current_pattern[i])) > 350:
+            for i in range(0, self.constants.get_pattern_len() - 1, 1):
+                if abs(percentage_change.percent_change(_each_pattern[i], pattern[i])) > 350:
                     _should_skip = True
                     break
             # Only skips if one of the data points is too far out and doesn't meet the requirement
             if _should_skip:
                 continue
             # If it all passes, then it appends the result of that array to the array that holds all the results
-            _predicted_outcomes_array.append(performance_array[b])
+            _predicted_outcomes_array.append(self._performance_array[b])
         # returns that array
         return _predicted_outcomes_array
 
-    def recognition(self):
+    def recognition(self, pattern):
         """
         This runs the recognition process on the current pattern
         :return: null
         """
         # This creates a start time to calculate how long it took to run recognition
         _start_time = time.time()
-        # Decides whether the pattern is one that starts by going up or down (same as the data arrays from the db)
-        if self._current_pattern[1] >= self._current_pattern[0]:
-            # It will therefore run the percentage change using the right arrays ie. BUY
-            _predicted_outcomes_array = self.analyse_pattern(self._buy_pattern_array, self._buy_performance_array)
-        else:
-            # It will therefore run the percentage change using the right arrays ie. SELL
-            _predicted_outcomes_array = self.analyse_pattern(self._sell_pattern_array, self._sell_performance_array)
+        _predicted_outcomes_array = self.analyse_pattern(pattern)
 
         # Calculates the number of patterns found from the returned array of previous outcomes
         _num_patterns_found = len(_predicted_outcomes_array)
         # If the number is greater than the required amount, it can continue
-        if _num_patterns_found > constants.patternNumberReq:
+        if _num_patterns_found > self.constants.get_num_pattern_req():
             # It averages the outcome of all the numbers in the array to get an average outcome
             _predicted_avg_outcome = sum(_predicted_outcomes_array) / len(_predicted_outcomes_array)
 
             # It then decides whether the 'difference' is great enough to be worthy of a trade
-            # Initialises the _optin to N/A in case that there is not the requierd difference, it won't cause an error
-            _option = "N/A"
-            if _predicted_avg_outcome < -constants.required_difference:
-                # It calls the api to sell
-                self.api.buy()
-                _option = "SELL"
-            elif _predicted_avg_outcome > constants.required_difference:
-                # Calls the api to buy
-                self.api.sell()
-                _option = "BUY"
+            # Initialises the _option to N/A in case that there is not the required difference, it won't cause an error
+            _option = enums.Option.NO_TRADE
+            if _predicted_avg_outcome < -self.constants.get_required_difference():
+                # SELLS
+                _option = enums.Option.SELL
+            elif _predicted_avg_outcome > self.constants.get_required_difference():
+                # BUYS
+                _option = enums.Option.BUY
 
             # If there has been a trade
-            if _option != "N/A":
+            if _option != enums.Option.NO_TRADE:
                 # Increase the number of bets that have happened
                 self._num_bets += 1
                 _sell_array = list(filter(lambda x: x < 0, _predicted_outcomes_array))
                 # _sell_array_avg = reduce(lambda x, y: x + y, _sell_array) / len(_sell_array)
                 _buy_array = list(filter(lambda x: x > 0, _predicted_outcomes_array))
-                _buy_array_avg = reduce(lambda x, y: x + y, _buy_array) / len(_buy_array)
+                # _buy_array_avg = reduce(lambda x, y: x + y, _buy_array) / len(_buy_array)
                 # Insert into the database all the details for the trade
-                self._log_handler.insert(num_patterns=_num_patterns_found,
-                                         avg_predicted_outcome=_predicted_avg_outcome,
-                                         time_for_recog=time.time() - _start_time,
-                                         num_bets=self._num_bets,
-                                         num_down_arrays=len(_sell_array),
-                                         num_up_arrays=len(_buy_array))
+                # self._log_handler.insert(num_patterns=_num_patterns_found,
+                #                          avg_predicted_outcome=_predicted_avg_outcome,
+                #                          time_for_recog=time.time() - _start_time,
+                #                          num_bets=self._num_bets,
+                #                          num_down_arrays=len(_sell_array),
+                #                          num_up_arrays=len(_buy_array))
 
                 # Print all the details so it can be seen on the terminal
-                print('\n#####\nPatterns Found: {}\nOption: {}\nAvgOutcome: {}\nTime for Recog: {}\nNumber Of Bets: '
-                      '{}\nDownArrays {}\nUpArrays {}'.format(_num_patterns_found, _option, _predicted_avg_outcome,
-                                                              time.time() - _start_time, self._num_bets,
-                                                              len(_sell_array), len(_buy_array)))
+                # print('\n#####\nPatterns Found: {}\nOption: {}\nAvgOutcome: {}\nTime for Recog: {}\nNumber Of Bets: '
+                #       '{}\nDownArrays {}\nUpArrays {}'.format(_num_patterns_found, _option, _predicted_avg_outcome,
+                #                                               time.time() - _start_time, self._num_bets,
+                #                                               len(_sell_array), len(_buy_array)))
+                return _option
             else:
                 # No patterns have been found or criteria not met
                 self.no_patterns(time.time() - _start_time)
+                return None
 
         else:
             # No patterns have been found or criteria not met
@@ -130,30 +124,13 @@ class PatternRecognition:
         :return: null
         """
         # Prints that there are no patterns and inserts the data into the db
-        print 'No patterns in: '.format(final_time)
-        self._log_handler.insert(num_patterns=None,
-                                 avg_predicted_outcome=None,
-                                 time_for_recog=final_time,
-                                 num_bets=None,
-                                 num_down_arrays=None,
-                                 num_up_arrays=None)
-
-    def add_to_pattern(self, _next_point):
-        """
-        This function adds data to the current pattern and also calculates the percentage change within the
-        array every time new data is added
-        :param _next_point: the data point to be added from the live api
-        :return: null
-        """
-        # TODO: THIS DOESN'T HAVE TO GO THROUGH ALL THE DATA EVERY TIME, JUST THE LAST POINT
-        self.current_raw_pattern.append(_next_point)
-        temp_pat = []
-        if len(self.current_raw_pattern) >= constants.length_of_pattern:
-            for i in range(1, len(self.current_raw_pattern), 1):
-                temp_pat.append(percentage_change.percent_change(
-                    self.current_raw_pattern[0], self.current_raw_pattern[i]))
-            self.current_raw_pattern = self.current_raw_pattern[-constants.length_of_pattern:]
-            self._current_pattern = temp_pat[-constants.length_of_pattern:]
+        # print 'No patterns in: '.format(final_time)
+        # self._log_handler.insert(num_patterns=None,
+        #                          avg_predicted_outcome=None,
+        #                          time_for_recog=final_time,
+        #                          num_bets=None,
+        #                          num_down_arrays=None,
+        #                          num_up_arrays=None)
 
     def start(self):
         """
@@ -161,47 +138,46 @@ class PatternRecognition:
         running the recognition every minute from then on in order to trade
         :return:
         """
-        # This syncs the algorithm with the server time so it can use time.sleep later to not use any CPU
-        while self.api.get_seconds_left() != 0:
-            # Prints the server time left
-            print 'Sevrer Time: ', self.api.get_seconds_left()
-            # This sleeps for 0.9 seconds seconds so that it only iterates again nearer the correct time
-            time.sleep(0.9)
-        # Adds the newest data point got from the iqoption api to the pattern for recognition
-        try:
-            self.add_to_pattern(self.api.get_next_data_point())
-        except Exception as e:
-            print e
-
-
-
-        # Prints the length of the pattern so you know where it is up to
-        print 'length of the pattern: ', len(self._current_pattern)
-        # Sleeps so that it only runs when the minute is nearly up
-        time.sleep(58)
-        # Create an infinite loop so that it continues trading until you manually stop it
-        first_time_period = time.time()
-        second_time_period = first_time_period + (2 * 60 * 60)
-        third_time_period = second_time_period + (2 * 60 * 60)
-        fourth_time_period = second_time_period + (2 * 60 * 60)
-        while time.time():
-            # try and catch so that it doesn't break when an error happens because it is on the server
-            try:
-                # Gets the seconds left. If not 0 then it loops back again and tests again until it is
-                if self.api.get_seconds_left() == 0:
-                    # Adds it to the current pattern so that it increases in size until length_of_pattern
-                    self.add_to_pattern(self.api.get_next_data_point())
-                    # Prints the length of the pattern so you know where it is up to
-                    print 'length of the pattern: ', len(self._current_pattern)
-                    # Only runs recognition if the pattern length is long enough. This is just a test to avoid errors
-                    if len(self._current_pattern) >= constants.length_of_pattern:
-                        # Run recognition on the current pattern
-                        self.recognition()
-                    # Sleep for nearly a minute to not waste CPU time
-                    time.sleep(58)
-            # This is the exception if there are any errors, it will print them
-            except Exception as e:
-                print e
+        print 'Pattern length: ', self.constants.get_pattern_len()
+        print 'Required Difference: ', self.constants.get_required_difference()
+        print 'Number patterns Req: ', self.constants.get_num_pattern_req()
+        print 'Interval size: ', self.constants.get_interval_size()
+        _num_loses = 0
+        _num_draws = 0
+        _num_no_bets = 0
+        _num_wins = 0
+        # Number of patterns there are
+        max_iterations = len(self.pattern_data_tuples[0])
+        print 'max_iterations: ', max_iterations
+        index = 0
+        while index < max_iterations-1:
+            # Run recognition on the current pattern
+            result = self.recognition(self.pattern_data_tuples[0][index])
+            if result == enums.Option.NO_TRADE:
+                _num_no_bets += 1
+            else:
+                if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index+1]:
+                    if result == enums.Option.BUY:
+                        _num_wins += 1
+                    elif result == enums.Option.SELL:
+                        _num_loses += 1
+                elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index+1]:
+                    if result == enums.Option.BUY:
+                        _num_loses += 1
+                    elif result == enums.Option.SELL:
+                        _num_wins += 1
+                else:
+                    _num_draws += 1
+            if index % 10 == 0:
+                print index
+            index += 1
+        total_num_bets = _num_wins + _num_draws + _num_loses
+        percentage_win = float(float(_num_wins) / float(total_num_bets)) * 100
+        percentage_lose = float(float(_num_loses) / float(total_num_bets)) * 100
+        percentage_draw = float(float(_num_draws) / float(total_num_bets)) * 100
+        print 'Percentage Win: {}%\nPercentage Lose: {}%\nPercentage Draw: {}%'\
+            .format(percentage_win, percentage_lose, percentage_draw)
+        return percentage_win, percentage_lose, percentage_draw
 
     # This is put in to avoid errors but I don't know why it is needed so leave it in
     if __name__ == '__main__':

@@ -15,9 +15,8 @@ class DBHandler(object):
         """
         Constructor for setting up the base variables.
         """
-        print os.getcwd() + '/databases/iqoption.sql'
         # The database name
-        self._database = str(os.getcwd() + '/databases/iqoption.sql')
+        self._database = str(os.getcwd() + '\databases\iqoption.sql')
         # Is it connected to the database
         self._connected = False
         # The connection to the database

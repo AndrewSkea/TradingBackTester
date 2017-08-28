@@ -12,3 +12,10 @@ class SelectTypes(Enum):
 class StatementType(Enum):
     SELECT = 0
     INSERT = 1
+
+
+class Option(Enum):
+    SELL = 0
+    BUY = 1
+    DRAW = 2
+    NO_TRADE = 3

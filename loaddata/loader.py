@@ -1,5 +1,5 @@
 from methods import percentage_change
-from constants import constants
+import numpy as np
 import time
 
 
@@ -10,26 +10,31 @@ class Loader:
     recognition to process
     """
 
-    def __init__(self, all_data):
+    def __init__(self, all_data, constants_class):
         """
         Initialises the base variables for the class
         :param all_data: This is the array of all the data that is taken from the histdata table in the db
         :param constants.length_of_pattern: This is the global length of pattern used by all classes
         """
-        # This is all the data taken from the database
+        self.constants = constants_class
         self._all_data = all_data
+        self._close_prices_for_loading = []
+        # This is all the close prices of the database
+        for i in all_data:
+            self._close_prices_for_loading.append(i[-1])
         # The size of the array that holds all the data i.e. How many data points there are
-        self._all_data_length = len(self._all_data)
+        self._all_data_length = len(self._close_prices_for_loading)
 
         # Initialising the arrays
-        # The buy pattern array is the set of arrays where the outcome has been higher (i.e. should buy)
-        self._buy_pattern_array = []
-        # The performance array is the outcome. It has the same index as it's relative pattern in the pattern array
-        self._buy_performance_array = []
-        # The sell pattern array is the set of arrays where the outcome is lower than (i.e. should sell)
-        self._sell_pattern_array = []
-        # The sell performance array is the set of outcomes for the sell pattern array
-        self._sell_performance_array = []
+        # Percentage Change pattern array
+        self._pattern_array = []
+        # The performance array, i,e, what the outcome was (percentage change from the starting value too)
+        self._performance_array = []
+        self._time = []
+        self._open_price = []
+        self._high_price = []
+        self._low_price = []
+        self._close_price = []
 
     def pattern_storage(self):
         """
@@ -39,34 +44,31 @@ class Loader:
         _start_time = time.time()
         # This is the data length that is going to be used so tht it doesn't go until the end because there
         # won't be any data +30 points in the future then
-        _used_data_length = int(self._all_data_length - (2 * (constants.length_of_pattern-1))/constants._interval_size)
-        _current_index = constants.length_of_pattern
+        _used_data_length = int(self._all_data_length - (2 * (self.constants.get_pattern_len()-1)) / self.constants.get_interval_size())
+        _current_index = self.constants.get_pattern_len()
         # Goes through all the data to get the percentage change through all of it
         while _current_index < _used_data_length:
             pattern = []
-            for i in range(constants.length_of_pattern - 2, -1, -1):
+            for i in range(self.constants.get_pattern_len() - 2, -1, -1):
                 pattern.append(percentage_change.percent_change(
-                    self._all_data[_current_index - constants.length_of_pattern + 1],
-                    self._all_data[_current_index - i]))
+                    self._close_prices_for_loading[_current_index - self.constants.get_pattern_len() + 1],
+                    self._close_prices_for_loading[_current_index - i]))
 
-            _outcome_range = self._all_data[_current_index+1]
-            _current_point = self._all_data[_current_index]
+            _outcome_range = self._close_prices_for_loading[_current_index + 1]
+            _current_point = self._close_prices_for_loading[_current_index]
             _future_outcome = percentage_change.percent_change(_current_point, _outcome_range)
 
-            if pattern[1] >= pattern[0]:
-                self._buy_pattern_array.append(pattern)
-                self._buy_performance_array.append(_future_outcome)
-            else:
-                self._sell_pattern_array.append(pattern)
-                self._sell_performance_array.append(_future_outcome)
+            self._pattern_array.append(pattern)
+            self._performance_array.append(_future_outcome)
+            self._time.append(self._all_data[_current_index][1])
+            self._open_price.append(self._all_data[_current_index][2])
+            self._high_price.append(self._all_data[_current_index][3])
+            self._low_price.append(self._all_data[_current_index][4])
+            self._close_price.append(self._all_data[_current_index][5])
 
             _current_index += 1
-        print 'Time for recognition: ', time.time() - _start_time
-        # print len(self._buy_pattern_array)
-        # print len(self._buy_performance_array)
-        # print len(self._sell_pattern_array)
-        # print len(self._sell_performance_array)
-        return (self._buy_pattern_array, self._buy_performance_array,
-                self._sell_pattern_array, self._sell_performance_array)
+        print '{} patterns processed in {} s'.format(len(self._pattern_array),time.time() - _start_time)
+        return (self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price,
+                self._low_price, self._close_price)
 
 
