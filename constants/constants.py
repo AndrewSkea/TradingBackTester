@@ -1,9 +1,9 @@
 class Constants:
     def __init__(self):
-        self._length_of_pattern = 25
-        self._num_pattern_req = 1000
-        self._required_difference = 0
-        self._interval_size = 1
+        self._length_of_pattern = 30
+        self._num_pattern_req = 2000
+        self._required_difference = 0.000075
+        self._interval_size = 2
 
     def set_pattern_len(self, num):
         self._length_of_pattern = num

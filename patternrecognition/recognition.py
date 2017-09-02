@@ -87,25 +87,8 @@ class PatternRecognition:
 
             # If there has been a trade
             if _option != enums.Option.NO_TRADE:
-                # Increase the number of bets that have happened
                 self._num_bets += 1
-                _sell_array = list(filter(lambda x: x < 0, _predicted_outcomes_array))
-                # _sell_array_avg = reduce(lambda x, y: x + y, _sell_array) / len(_sell_array)
-                _buy_array = list(filter(lambda x: x > 0, _predicted_outcomes_array))
-                # _buy_array_avg = reduce(lambda x, y: x + y, _buy_array) / len(_buy_array)
-                # Insert into the database all the details for the trade
-                # self._log_handler.insert(num_patterns=_num_patterns_found,
-                #                          avg_predicted_outcome=_predicted_avg_outcome,
-                #                          time_for_recog=time.time() - _start_time,
-                #                          num_bets=self._num_bets,
-                #                          num_down_arrays=len(_sell_array),
-                #                          num_up_arrays=len(_buy_array))
-
-                # Print all the details so it can be seen on the terminal
-                # print('\n#####\nPatterns Found: {}\nOption: {}\nAvgOutcome: {}\nTime for Recog: {}\nNumber Of Bets: '
-                #       '{}\nDownArrays {}\nUpArrays {}'.format(_num_patterns_found, _option, _predicted_avg_outcome,
-                #                                               time.time() - _start_time, self._num_bets,
-                #                                               len(_sell_array), len(_buy_array)))
+                print time.time() - _start_time
                 return _option
             else:
                 # No patterns have been found or criteria not met
