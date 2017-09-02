@@ -1,18 +1,22 @@
 import time
 import enums
 from iqoption import iqapi
-from methods import percentage_change
+from methods.percentage_change import PercentageChange
+from methods.macd import MACD
 from databases import LogHandler
 
 
 class PatternRecognition:
-    def __init__(self, _data_array_tuple, _patterns_array_tuple, constants_class):
+    def __init__(self, _data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple, constants_class, macd_class):
         """
         This initialises all the data that is needed in this class
         :param array_data_tuple: 
         """
+        # Instance for the constants class
         self.constants = constants_class
+        # Tuple for all the past data
         array_data_tuple = _data_array_tuple
+        # Tuple for the live patterns
         self.pattern_data_tuples = _patterns_array_tuple
         # Creates an instance of the iq options api class of this project
         self.api = iqapi.IQOptionApi()
@@ -32,72 +36,57 @@ class PatternRecognition:
         self._log_handler = LogHandler()
         # Number of bets
         self._num_bets = 0
+        # MACD class instance
+        self._macd = macd_class
+        # Percentage Change class
+        self._pc = PercentageChange(self.constants, self._pattern_array, self._performance_array)
 
-    def analyse_pattern(self, pattern):
-        """
-        This function goes through all the data in the arrays and returns the amount of similar patterns
-        :return: returns the predicted outcomes array which holds all the outcomes from the similar patterns
-        """
-        # This is the array of predicted outcomes from all the patterns
-        _predicted_outcomes_array = []
-        # iterates through the historic data array to find similar patterns
-        for b in range(len(self._pattern_array)):
-            # Uses a should skip boolean to check whether to skip the current pattern completely
-            _should_skip = False
-            # Gets the pattern that it will use
-            _each_pattern = self._pattern_array[b]
-            # Goes through the pattern and sees if each percentage change is within the right limit, else continue
-            for i in range(0, self.constants.get_pattern_len() - 1, 1):
-                if abs(percentage_change.percent_change(_each_pattern[i], pattern[i])) > 350:
-                    _should_skip = True
-                    break
-            # Only skips if one of the data points is too far out and doesn't meet the requirement
-            if _should_skip:
-                continue
-            # If it all passes, then it appends the result of that array to the array that holds all the results
-            _predicted_outcomes_array.append(self._performance_array[b])
-        # returns that array
-        return _predicted_outcomes_array
-
-    def recognition(self, pattern):
+    def recognition(self, pattern, close_value):
         """
         This runs the recognition process on the current pattern
+        :param pattern:
         :return: null
         """
-        # This creates a start time to calculate how long it took to run recognition
-        _start_time = time.time()
-        _predicted_outcomes_array = self.analyse_pattern(pattern)
+        strength_of_option = 0
+        option = enums.Option.NO_TRADE
 
-        # Calculates the number of patterns found from the returned array of previous outcomes
-        _num_patterns_found = len(_predicted_outcomes_array)
-        # If the number is greater than the required amount, it can continue
-        if _num_patterns_found > self.constants.get_num_pattern_req():
-            # It averages the outcome of all the numbers in the array to get an average outcome
-            _predicted_avg_outcome = sum(_predicted_outcomes_array) / len(_predicted_outcomes_array)
+        percentage_change_result = self._pc.get_result_of_pc(pattern=pattern)
+        self._macd.add_data_point(close_value)
+        macd_result = self._macd.get_result()
 
-            # It then decides whether the 'difference' is great enough to be worthy of a trade
-            # Initialises the _option to N/A in case that there is not the required difference, it won't cause an error
-            _option = enums.Option.NO_TRADE
-            if _predicted_avg_outcome < -self.constants.get_required_difference():
-                # SELLS
-                _option = enums.Option.SELL
-            elif _predicted_avg_outcome > self.constants.get_required_difference():
-                # BUYS
-                _option = enums.Option.BUY
-
-            # If there has been a trade
-            if _option != enums.Option.NO_TRADE:
-                self._num_bets += 1
-                print time.time() - _start_time
-                return _option
+        if macd_result == enums.Direction.UP:
+            if percentage_change_result == enums.Option.BUY:
+                option = enums.Option.BUY
+                strength_of_option = 10
+            elif percentage_change_result == enums.Option.SELL:
+                option = enums.Option.SELL
+                strength_of_option = 3
             else:
-                # No patterns have been found or criteria not met
-                self.no_patterns(time.time() - _start_time)
-                return None
-
+                option = enums.Option.BUY
+                strength_of_option = 2
+        elif macd_result == enums.Direction.DOWN:
+            if percentage_change_result == enums.Option.BUY:
+                option = enums.Option.BUY
+                strength_of_option = 3
+            elif percentage_change_result == enums.Option.SELL:
+                option = enums.Option.SELL
+                strength_of_option = 10
+            else:
+                option = enums.Option.SELL
+                strength_of_option = 2
         else:
             # No patterns have been found or criteria not met
-            self.no_patterns(time.time() - _start_time)
+            if percentage_change_result == enums.Option.BUY:
+                option = enums.Option.BUY
+                strength_of_option = 1
+            elif percentage_change_result == enums.Option.SELL:
+                option = enums.Option.SELL
+                strength_of_option = 1
+            else:
+                option = enums.Option.NO_TRADE
+                strength_of_option = 0
+
+        return option, strength_of_option
 
     def no_patterns(self, final_time):
         """
@@ -107,13 +96,7 @@ class PatternRecognition:
         :return: null
         """
         # Prints that there are no patterns and inserts the data into the db
-        # print 'No patterns in: '.format(final_time)
-        # self._log_handler.insert(num_patterns=None,
-        #                          avg_predicted_outcome=None,
-        #                          time_for_recog=final_time,
-        #                          num_bets=None,
-        #                          num_down_arrays=None,
-        #                          num_up_arrays=None)
+        print 'No patterns in: '.format(final_time)
 
     def start(self):
         """
@@ -125,42 +108,64 @@ class PatternRecognition:
         print 'Required Difference: ', self.constants.get_required_difference()
         print 'Number patterns Req: ', self.constants.get_num_pattern_req()
         print 'Interval size: ', self.constants.get_interval_size()
-        _num_loses = 0
-        _num_draws = 0
-        _num_no_bets = 0
-        _num_wins = 0
+        result_array = []
         # Number of patterns there are
         max_iterations = len(self.pattern_data_tuples[0])
         print 'max_iterations: ', max_iterations
         index = 0
-        while index < max_iterations-1:
+        while index < max_iterations - 1:
             # Run recognition on the current pattern
-            result = self.recognition(self.pattern_data_tuples[0][index])
-            if result == enums.Option.NO_TRADE:
-                _num_no_bets += 1
+            option, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index])
+            if option == enums.Option.NO_TRADE:
+                print index, " - No Trades"
             else:
-                if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index+1]:
-                    if result == enums.Option.BUY:
-                        _num_wins += 1
-                    elif result == enums.Option.SELL:
-                        _num_loses += 1
-                elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index+1]:
-                    if result == enums.Option.BUY:
-                        _num_loses += 1
-                    elif result == enums.Option.SELL:
-                        _num_wins += 1
+                if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
+                    if option == enums.Option.BUY:
+                        result_array.append((1, strength_of_option))
+                        print index, ' - WIN x ', strength_of_option
+                    elif option == enums.Option.SELL:
+                        result_array.append((-1, strength_of_option))
+                        print index, ' - LOSE x ', strength_of_option
+                elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
+                    if option == enums.Option.BUY:
+                        result_array.append((-1, strength_of_option))
+                        print index, ' - LOSE x ', strength_of_option
+                    elif option == enums.Option.SELL:
+                        result_array.append((1, strength_of_option))
+                        print index, ' - WIN x ', strength_of_option
                 else:
-                    _num_draws += 1
-            if index % 10 == 0:
-                print index
+                    result_array.append((0, strength_of_option))
+                    print index, ' - DRAW x ', strength_of_option
             index += 1
-        total_num_bets = _num_wins + _num_draws + _num_loses
-        percentage_win = float(float(_num_wins) / float(total_num_bets)) * 100
-        percentage_lose = float(float(_num_loses) / float(total_num_bets)) * 100
-        percentage_draw = float(float(_num_draws) / float(total_num_bets)) * 100
-        print 'Percentage Win: {}%\nPercentage Lose: {}%\nPercentage Draw: {}%'\
-            .format(percentage_win, percentage_lose, percentage_draw)
-        return percentage_win, percentage_lose, percentage_draw
+
+        _num_wins_strength_1 = result_array.count((1, 1))
+        _num_wins_strength_2 = result_array.count((1, 2))
+        _num_wins_strength_3 = result_array.count((1, 3))
+        _num_wins_strength_10 = result_array.count((1, 10))
+        _num_loses_strength_1 = result_array.count((-1, 1))
+        _num_loses_strength_2 = result_array.count((-1, 2))
+        _num_loses_strength_3 = result_array.count((-1, 3))
+        _num_loses_strength_10 = result_array.count((-1, 10))
+        _num_draws_strength_0 = result_array.count((0, 0))
+
+        _num_wins = _num_wins_strength_1 + _num_wins_strength_2 + _num_wins_strength_3 + _num_wins_strength_10
+        _num_loses = _num_loses_strength_1 + _num_loses_strength_2 + _num_loses_strength_3 + _num_loses_strength_10
+        _num_draws = _num_draws_strength_0
+
+        percentage_win = float(_num_wins) / float(_num_loses + _num_draws + _num_wins)
+
+        print '\n\n\n\nPercentage win = ', percentage_win
+        print '_num_wins_strength_1  = ', _num_wins_strength_1
+        print '_num_wins_strength_2  = ', _num_wins_strength_2
+        print '_num_wins_strength_3  = ', _num_wins_strength_3
+        print '_num_wins_strength_10 = ', _num_wins_strength_10
+        print '_num_loses_strength_1 = ', _num_loses_strength_1
+        print '_num_loses_strength_2 = ', _num_loses_strength_2
+        print '_num_loses_strength_3 = ', _num_loses_strength_3
+        print '_num_loses_strength_10 = ', _num_loses_strength_10
+        print '_num_draws_strength_0 = ', _num_draws_strength_0
+
+        return percentage_win
 
     # This is put in to avoid errors but I don't know why it is needed so leave it in
     if __name__ == '__main__':

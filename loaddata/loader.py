@@ -1,5 +1,4 @@
-from methods import percentage_change
-import numpy as np
+from methods.percentage_change import percent_change
 import time
 
 
@@ -24,7 +23,6 @@ class Loader:
             self._close_prices_for_loading.append(i[-1])
         # The size of the array that holds all the data i.e. How many data points there are
         self._all_data_length = len(self._close_prices_for_loading)
-
         # Initialising the arrays
         # Percentage Change pattern array
         self._pattern_array = []
@@ -50,13 +48,13 @@ class Loader:
         while _current_index < _used_data_length:
             pattern = []
             for i in range(self.constants.get_pattern_len() - 2, -1, -1):
-                pattern.append(percentage_change.percent_change(
+                pattern.append(percent_change(
                     self._close_prices_for_loading[_current_index - self.constants.get_pattern_len() + 1],
                     self._close_prices_for_loading[_current_index - i]))
 
             _outcome_range = self._close_prices_for_loading[_current_index + 1]
             _current_point = self._close_prices_for_loading[_current_index]
-            _future_outcome = percentage_change.percent_change(_current_point, _outcome_range)
+            _future_outcome = percent_change(_current_point, _outcome_range)
 
             self._pattern_array.append(pattern)
             self._performance_array.append(_future_outcome)
@@ -67,7 +65,7 @@ class Loader:
             self._close_price.append(self._all_data[_current_index][5])
 
             _current_index += 1
-        print '{} patterns processed in {} s'.format(len(self._pattern_array),time.time() - _start_time)
+        print '{} patterns processed in {} s'.format(len(self._pattern_array), time.time() - _start_time)
         return (self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price,
                 self._low_price, self._close_price)
 

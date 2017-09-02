@@ -3,10 +3,10 @@ import databases
 import loaddata
 import constants
 import patternrecognition
-from multiprocessing import Pool, TimeoutError
+from methods import macd
 
 
-class main(object):
+class Main(object):
     """
     Where the main thread of execution begins
     Initialises the other classes and starts the recognition
@@ -17,7 +17,7 @@ class main(object):
         Initialises the classes. Starting with loading the data then running iqoption
         then it starts the recognition process
         """
-        self.constants = constants
+        self.constants = constants_class
 
     def start(self):
         """
@@ -30,8 +30,10 @@ class main(object):
         _data_array_tuple = self.start_loading_data(all_data_array=_past_data[0])
         # this is the tuple of the arrays of the patterns we will consider 'live' patterns
         _patterns_array_tuple = self.start_loading_data(all_data_array=_past_data[1])
+        # this is the tuple of the arrays of the patterns we will consider for the indicators to work
+        _indicator_data_array_tuple = self.start_loading_data(all_data_array=_past_data[2])
         # Starts the recognition part of the program
-        return self.start_pattern_recognition(_data_array_tuple, _patterns_array_tuple)
+        self.start_pattern_recognition(_data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple)
 
     def start_db(self):
         """
@@ -39,15 +41,17 @@ class main(object):
         :return: Array of all data that will be passed into the dataloader class
         """
         # Creates an instance of the database
-        self._database = databases.database.Database()
+        _database = databases.database.Database()
         # Creates an instance of the log handler class
         # self._log_handler = databases.log_handler.LogHandler()
         # Creates an instance of the histdata handler
-        self._histdata_handler = databases.histdata_handler.HistDBHandler()
+        _histdata_handler = databases.histdata_handler.HistDBHandler(self.constants)
         # Calls the create database function which in turn makes the tables too
-        self._database.create_database()
+        _database.create_database()
         # Return the full data array
-        return self._histdata_handler.get_all_data(), self._histdata_handler.get_all_pattern_data(amount=2500)
+        return _histdata_handler.get_all_data(), \
+               _histdata_handler.get_all_pattern_data(), \
+               _histdata_handler.get_all_data_for_indicators()
 
     def start_loading_data(self, all_data_array):
         """
@@ -60,74 +64,81 @@ class main(object):
         # Return the tuple of the 4 arrays
         return _loader.pattern_storage()
 
-    def start_pattern_recognition(self, _data_array_tuple, _patterns_array_tuple):
+    def start_pattern_recognition(self, _data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple):
         """
         Starts the recognition with the tuple of data and performance arrays
         :param _patterns_array_tuple:
         :param _data_array_tuple: the tuple of buy and sell data and performance arrays
         :return:
         """
+        # Sets up the past data for the MACD and Ema
+        macd_class = macd.MACD(_data_array_tuple[6], self.constants)
+        macd_class.calculate_initial_macd_array()
+        macd_class.calculate_initial_signal_array()
+        macd_class.calculate_initial_crossover_array()
         # Creates recognition class instance
-        _recognition = patternrecognition.recognition.PatternRecognition(
-                                            _data_array_tuple, _patterns_array_tuple, self.constants)
+        _recognition = patternrecognition.recognition.PatternRecognition(_data_array_tuple,
+                                                                         _patterns_array_tuple,
+                                                                         _indicator_data_array_tuple,
+                                                                         self.constants,
+                                                                         macd_class)
         # Starts the recognition on the pattern and the live data from the api in the class
-        return _recognition.start
+        percentage_win = _recognition.start()
+        print percentage_win
 
 
-option = raw_input('Enter option: ')
-if option == '0':
-    constants = constants.Constants()
-    main_class = main(constants)
-    result = main_class.start()
+# option = raw_input('Enter option: ')
+# if option == '0':
+constants = constants.Constants()
+main_class = Main(constants)
+result = main_class.start()
 
-else:
-    constants = constants.Constants()
-    win_percentages = []
-    lose_percentages = []
-    draws_percentages = []
-
-    best_win_percentage = 0
-    best_len_pattern = 0
-    best_req_patterns = 0
-    best_req_difference = 0
-    best_interval = 0
-
-    pool = Pool(5)
-
-    # This alters the pattern length
-    for i in range(25, 35, 1):
-        # This alters the number of required patterns
-        for j in range(1000, 5000, 1000):
-            # This alters the required difference
-            for k in range(70, 80, 5):
-                # This alters the intervals of steps when loading data
-                for l in range(1, 5, 1):
-                    constants.set_interval_size(l)
-                    constants.set_num_pattern_req(j)
-                    constants.set_pattern_len(i)
-                    constants.set_required_difference(float(float(k) / float(1000000)))
-                    # Starts recognition with these settings
-                    main_class = main(constants)
-                    result = main_class.start()
-                    if result[0] > best_win_percentage:
-                        best_win_percentage = result[0]
-                        best_len_pattern = i
-                        best_req_patterns = j
-                        best_req_difference = k
-                        best_interval = l
-                    win_percentages.append(result[0])
-                    lose_percentages.append(result[1])
-                    draws_percentages.append(result[2])
-
-    f = open(os.getcwd() + '/README.md', 'a')
-    string = 'Max win Percentage: {}\n' \
-             'Best Pattern Length: {}\n' \
-             'Best Req Num Patterns: {}\n' \
-             'Best Req Difference: {}\n' \
-             'Best Interval: {}'.format(max(win_percentages),
-                                        best_len_pattern,
-                                        best_req_patterns,
-                                        best_req_difference,
-                                        best_interval)
-    f.write(string)
-    print string
+# elif option == '1':
+#     constants = constants.Constants()
+#     win_percentages = []
+#     lose_percentages = []
+#     draws_percentages = []
+#
+#     best_win_percentage = 0
+#     best_len_pattern = 0
+#     best_req_patterns = 0
+#     best_req_difference = 0
+#     best_interval = 0
+#
+#     # This alters the pattern length
+#     for i in range(25, 35, 1):
+#         # This alters the number of required patterns
+#         for j in range(1000, 5000, 1000):
+#             # This alters the required difference
+#             for k in range(70, 80, 5):
+#                 # This alters the intervals of steps when loading data
+#                 for l in range(1, 5, 1):
+#                     constants.set_interval_size(l)
+#                     constants.set_num_pattern_req(j)
+#                     constants.set_pattern_len(i)
+#                     constants.set_required_difference(float(float(k) / float(1000000)))
+#                     # Starts recognition with these settings
+#                     main_class = Main(constants)
+#                     result = main_class.start()
+#                     if result[0] > best_win_percentage:
+#                         best_win_percentage = result[0]
+#                         best_len_pattern = i
+#                         best_req_patterns = j
+#                         best_req_difference = k
+#                         best_interval = l
+#                     win_percentages.append(result[0])
+#                     lose_percentages.append(result[1])
+#                     draws_percentages.append(result[2])
+#
+#     f = open(os.getcwd() + '/README.md', 'a')
+#     string = 'Max win Percentage: {}\n' \
+#              'Best Pattern Length: {}\n' \
+#              'Best Req Num Patterns: {}\n' \
+#              'Best Req Difference: {}\n' \
+#              'Best Interval: {}'.format(max(win_percentages),
+#                                         best_len_pattern,
+#                                         best_req_patterns,
+#                                         best_req_difference,
+#                                         best_interval)
+#     f.write(string)
+#     print string

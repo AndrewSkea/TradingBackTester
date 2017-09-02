@@ -19,3 +19,15 @@ class Option(Enum):
     BUY = 1
     DRAW = 2
     NO_TRADE = 3
+
+
+class Direction(Enum):
+    UP = 0,
+    DOWN = 1,
+    STRAIGHT = 2
+
+
+class Position(Enum):
+    ABOVE = 0,
+    BELOW = 1,
+    EQUAL = 2
