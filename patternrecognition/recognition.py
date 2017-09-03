@@ -7,7 +7,8 @@ from databases import LogHandler
 
 
 class PatternRecognition:
-    def __init__(self, _data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple, constants_class, macd_class):
+    def __init__(self, _data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple, constants_class,
+                 macd_class):
         """
         This initialises all the data that is needed in this class
         :param array_data_tuple: 
@@ -18,8 +19,6 @@ class PatternRecognition:
         array_data_tuple = _data_array_tuple
         # Tuple for the live patterns
         self.pattern_data_tuples = _patterns_array_tuple
-        # Creates an instance of the iq options api class of this project
-        self.api = iqapi.IQOptionApi()
         # This is the array that has the historic data patterns that end up buying
         self._pattern_array = array_data_tuple[0]
         # This is the buy performance array which is the pattern's outcome (same index as pattern)
@@ -104,19 +103,17 @@ class PatternRecognition:
         running the recognition every minute from then on in order to trade
         :return:
         """
-        print 'Pattern length: ', self.constants.get_pattern_len()
-        print 'Required Difference: ', self.constants.get_required_difference()
-        print 'Number patterns Req: ', self.constants.get_num_pattern_req()
-        print 'Interval size: ', self.constants.get_interval_size()
         result_array = []
         # Number of patterns there are
         max_iterations = len(self.pattern_data_tuples[0])
-        print 'max_iterations: ', max_iterations
+        print 'Number of iterations: ', max_iterations
+        _num_no_trades = 0
         index = 0
         while index < max_iterations - 1:
             # Run recognition on the current pattern
             option, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index])
             if option == enums.Option.NO_TRADE:
+                _num_no_trades += 1
                 print index, " - No Trades"
             else:
                 if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
@@ -151,21 +148,45 @@ class PatternRecognition:
         _num_wins = _num_wins_strength_1 + _num_wins_strength_2 + _num_wins_strength_3 + _num_wins_strength_10
         _num_loses = _num_loses_strength_1 + _num_loses_strength_2 + _num_loses_strength_3 + _num_loses_strength_10
         _num_draws = _num_draws_strength_0
+        _total_num_iterations = _num_wins + _num_loses + _num_draws + _num_no_trades
+        _rest_of_iterations = max_iterations - _total_num_iterations
 
-        percentage_win = float(_num_wins) / float(_num_loses + _num_draws + _num_wins)
+        _percentage_win = float(_num_wins) / float(_num_loses + _num_draws + _num_wins)
 
-        print '\n\n\n\nPercentage win = ', percentage_win
-        print '_num_wins_strength_1  = ', _num_wins_strength_1
-        print '_num_wins_strength_2  = ', _num_wins_strength_2
-        print '_num_wins_strength_3  = ', _num_wins_strength_3
-        print '_num_wins_strength_10 = ', _num_wins_strength_10
-        print '_num_loses_strength_1 = ', _num_loses_strength_1
-        print '_num_loses_strength_2 = ', _num_loses_strength_2
-        print '_num_loses_strength_3 = ', _num_loses_strength_3
-        print '_num_loses_strength_10 = ', _num_loses_strength_10
-        print '_num_draws_strength_0 = ', _num_draws_strength_0
+        print '\n\n\n\nPercentage win = ', _percentage_win, '\n', \
+            '_num_wins_strength_1  = ', _num_wins_strength_1, '\n', \
+            '_num_wins_strength_2  = ', _num_wins_strength_2, '\n', \
+            '_num_wins_strength_3  = ', _num_wins_strength_3, '\n', \
+            '_num_wins_strength_10 = ', _num_wins_strength_10, '\n', \
+            '_num_loses_strength_1 = ', _num_loses_strength_1, '\n', \
+            '_num_loses_strength_2 = ', _num_loses_strength_2, '\n', \
+            '_num_loses_strength_3 = ', _num_loses_strength_3, '\n', \
+            '_num_loses_strength_10 = ', _num_loses_strength_10, '\n', \
+            '_num_draws_strength_0 = ', _num_draws_strength_0, '\n', \
+            '_num_no_trades = ', _num_no_trades, '\n', \
+            '_total_num_iterations = ', _total_num_iterations
 
-        return percentage_win
+        result_csv_string = ',{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(
+            _percentage_win,
+            _num_wins_strength_1,
+            _num_wins_strength_2,
+            _num_wins_strength_3,
+            _num_wins_strength_10,
+            _num_loses_strength_1,
+            _num_loses_strength_2,
+            _num_loses_strength_3,
+            _num_loses_strength_10,
+            _num_draws_strength_0,
+            _num_no_trades,
+            _total_num_iterations,
+            _rest_of_iterations)
+
+        log_string = self.constants.get_csv_str() + result_csv_string
+
+        f = open("logdata/log.csv", 'a')
+        f.write(log_string)
+        f.close()
+        return _percentage_win
 
     # This is put in to avoid errors but I don't know why it is needed so leave it in
     if __name__ == '__main__':

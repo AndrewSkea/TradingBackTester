@@ -6,11 +6,17 @@ class Constants:
         It is put in a class because for the back-testing, these variables get changed
         in order to try tweak them
         """
+        # Length of the length of the pattern
         self._length_of_pattern = 30
+        # Number of pattern required for a trade to happen
         self._num_pattern_req = 2000
+        # Required difference of the predicted outcome to the last point in the array. Greater the better
         self._required_difference = 0.000075
-        self._interval_size = 2
-        self._cut_off = 400
+        # The amount of patterns to skip every iteration to provide more variety
+        self._interval_size = 1
+        # Number of the live patterns we are using
+        self._cut_off = 100
+        # Number of data points we use to compare the live patterns against
         self._max_num_data_points = 250000
         self._num_data_points_for_indicators = 50000
         self._indicator_num_decimal_points = 8
@@ -83,5 +89,19 @@ class Constants:
 
     def get_signal_period(self):
         return self._signal_period
+
+    def get_csv_str(self):
+        return '{},{},{},{},{},{},{},{},{},{},{}'.format(
+            self.get_pattern_len(),
+            self.get_num_pattern_req(),
+            self.get_required_difference(),
+            self.get_interval_size(),
+            self.get_cut_off(),
+            self.get_max_num_data_points(),
+            self.get_num_data_points_for_indicators(),
+            self.get_indicator_num_decimal_points(),
+            self.get_ema_a_period(),
+            self.get_ema_b_period(),
+            self.get_signal_period())
 
 

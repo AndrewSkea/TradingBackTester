@@ -83,7 +83,7 @@ class Main(object):
                                                                          self.constants,
                                                                          macd_class)
         # Starts the recognition on the pattern and the live data from the api in the class
-        percentage_win = _recognition.start()
+        percentage_win = _recognition.start
         print percentage_win
 
 
