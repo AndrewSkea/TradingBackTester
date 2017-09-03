@@ -135,6 +135,10 @@ class PatternRecognition:
                     print index, ' - DRAW x ', strength_of_option
             index += 1
 
+        return self.log_and_get_percentage_win(result_array, _num_no_trades, max_iterations)
+
+    def log_and_get_percentage_win(self, result_array, _num_no_trades, max_iterations):
+
         _num_wins_strength_1 = result_array.count((1, 1))
         _num_wins_strength_2 = result_array.count((1, 2))
         _num_wins_strength_3 = result_array.count((1, 3))

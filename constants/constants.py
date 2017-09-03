@@ -15,71 +15,163 @@ class Constants:
         # The amount of patterns to skip every iteration to provide more variety
         self._interval_size = 1
         # Number of the live patterns we are using
-        self._cut_off = 100
+        self._num_live_patterns = 100
         # Number of data points we use to compare the live patterns against
-        self._max_num_data_points = 250000
+        self._num_data_points = 250000
+        # Number of points the indicators have to run their ema and macd
         self._num_data_points_for_indicators = 50000
+        # The decimal places the indicators round to (prevents too many calculations)
         self._indicator_num_decimal_points = 8
+        # The period for ema 1 for the macd
         self._ema_a_period = 12
+        # The period for ema 2 for the maccs
         self._ema_b_period = 26
+        # The signal period done on the macd
         self._signal_period = 9
 
     def set_pattern_len(self, num):
+        """
+        Setter for the length of pattern
+        :param num: the number to set it to
+        :return: None
+        """
         self._length_of_pattern = num
 
     def set_num_pattern_req(self, num):
+        """
+        The setter for the number of required patterns
+        :param num: the number to set it to
+        :return: None
+        """
         self._num_pattern_req = num
 
     def set_required_difference(self, num):
+        """
+        The setter for the required difference for the patter recognition
+        :param num: the number to set it to
+        :return: None
+        """
         self._required_difference = num
 
     def set_interval_size(self, num):
+        """
+        The setter for the interval size for going through patterns
+        :param num: the number to set it to
+        :return: None
+        """
         self._interval_size = num
 
-    def set_cut_off(self, num):
-        self._cut_off = num
+    def set_num_live_patterns(self, num):
+        """
+        The setter for the cut off point
+        :param num: the number to set it to
+        :return: None
+        """
+        self._num_live_patterns = num
 
-    def set_max_num_data_points(self, num):
-        self._max_num_data_points = num
+    def set_num_data_points(self, num):
+        """
+        The setter for the number of data points to get from the database
+        :param num: the number to set it to
+        :return: None
+        """
+        self._num_data_points = num
 
     def set_num_data_points_for_indicators(self, num):
-        self._max_num_data_points = num
+        """
+        The setter for the number of data points that are taken from the database for the indicators
+        :param num: the number to set it to
+        :return: None
+        """
+        self._num_data_points = num
 
     def set_indicator_num_decimal_points(self, num):
-        self._max_num_data_points = num
+        """
+        The setter for the number of decimal points for the indicators
+        :param num: the number to set it to
+        :return: None
+        """
+        self._num_data_points = num
 
     def set_ema_a_period(self, num):
+        """
+        The setter for the ema period number 1
+        :param num: the number to set it to
+        :return: None
+        """
         self._ema_a_period = num
 
     def set_ema_b_period(self, num):
+        """
+        The setter for the ema period number 2
+        :param num: the number to set it to
+        :return: None
+        """
         self._ema_b_period = num
 
     def set_signal_period(self, num):
+        """
+        The setter for the signal period
+        :param num: the number to set it to
+        :return: None
+        """
         self._signal_period = num
 
     def get_pattern_len(self):
+        """
+        The getter for the length of pattern
+        :return: length of pattern constant
+        """
         return self._length_of_pattern
 
     def get_num_pattern_req(self):
+        """
+        The getter for the number of pattern required
+        :return: number patterns requierd constant
+        """
         return self._num_pattern_req
 
     def get_required_difference(self):
+        """
+        The getter for the required difference for the patter recognition
+        :return: The required differnce constant
+        """
         return self._required_difference
 
     def get_interval_size(self):
+        """
+        The getter for the interval size for going through patterns
+        :return: The interval size constant
+        """
         return self._interval_size
 
-    def get_cut_off(self):
-        return self._cut_off
+    def get_num_live_patterns(self):
+        """
+        The getter for the number of live patterns
+        :return: The number of live patterns constant
+        """
+        return self._num_live_patterns
 
-    def get_max_num_data_points(self):
-        return self._max_num_data_points
+    def get_num_data_points(self):
+        """
+        THe getter for the number of data points pulled from teh database
+        :return: The number of data points constant
+        """
+        return self._num_data_points
 
     def get_num_data_points_for_indicators(self):
-        return self._max_num_data_points
+        """
+        The number of data point for the indicators
+        :return: The number of data points
+        """
+        return self._num_data_points
 
     def get_indicator_num_decimal_points(self):
-        return self._max_num_data_points
+        """
+        The getter for the decimal points the n
+        :return:
+        """
+        return self._num_data_points
 
     def get_ema_a_period(self):
         return self._ema_a_period
@@ -96,8 +188,8 @@ class Constants:
             self.get_num_pattern_req(),
             self.get_required_difference(),
             self.get_interval_size(),
-            self.get_cut_off(),
-            self.get_max_num_data_points(),
+            self.get_num_live_patterns(),
+            self.get_num_data_points(),
             self.get_num_data_points_for_indicators(),
             self.get_indicator_num_decimal_points(),
             self.get_ema_a_period(),
