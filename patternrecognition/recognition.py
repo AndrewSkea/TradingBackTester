@@ -43,15 +43,14 @@ class PatternRecognition:
     def recognition(self, pattern, close_value):
         """
         This runs the recognition process on the current pattern
+        :param close_value:
         :param pattern:
         :return: null
         """
-        strength_of_option = 0
-        option = enums.Option.NO_TRADE
-
         percentage_change_result = self._pc.get_result_of_pc(pattern=pattern)
         self._macd.add_data_point(close_value)
         macd_result = self._macd.get_result()
+        ####################################################### ADD IN CCI CLASS AS WELL AS HIGH AND LOW VALUES
 
         if macd_result == enums.Direction.UP:
             if percentage_change_result == enums.Option.BUY:
@@ -111,28 +110,30 @@ class PatternRecognition:
         index = 0
         while index < max_iterations - 1:
             # Run recognition on the current pattern
+            _start_time = time.time()
             option, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index])
+            _end_time = time.time() - _start_time
             if option == enums.Option.NO_TRADE:
                 _num_no_trades += 1
-                print index, " - No Trades"
+                print index, ' - No Trades in ', _end_time
             else:
                 if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
                     if option == enums.Option.BUY:
                         result_array.append((1, strength_of_option))
-                        print index, ' - WIN x ', strength_of_option
+                        print index, ' - WIN x ', strength_of_option, 'in ', _end_time
                     elif option == enums.Option.SELL:
                         result_array.append((-1, strength_of_option))
-                        print index, ' - LOSE x ', strength_of_option
+                        print index, ' - LOSE x ', strength_of_option, 'in ', _end_time
                 elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
                     if option == enums.Option.BUY:
                         result_array.append((-1, strength_of_option))
-                        print index, ' - LOSE x ', strength_of_option
+                        print index, ' - LOSE x ', strength_of_option, 'in ', _end_time
                     elif option == enums.Option.SELL:
                         result_array.append((1, strength_of_option))
-                        print index, ' - WIN x ', strength_of_option
+                        print index, ' - WIN x ', strength_of_option, 'in ', _end_time
                 else:
                     result_array.append((0, strength_of_option))
-                    print index, ' - DRAW x ', strength_of_option
+                    print index, ' - DRAW x ', strength_of_option, 'in ', _end_time
             index += 1
 
         _num_wins_strength_1 = result_array.count((1, 1))
@@ -153,7 +154,7 @@ class PatternRecognition:
 
         _percentage_win = float(_num_wins) / float(_num_loses + _num_draws + _num_wins)
 
-        print '\n\n\n\nPercentage win = ', _percentage_win, '\n', \
+        print '\n\n\n\nPercentage win = ',("%.2f" % round(_percentage_win*100,2)), '%\n', \
             '_num_wins_strength_1  = ', _num_wins_strength_1, '\n', \
             '_num_wins_strength_2  = ', _num_wins_strength_2, '\n', \
             '_num_wins_strength_3  = ', _num_wins_strength_3, '\n', \

@@ -19,8 +19,8 @@ class IQOptionApi:
     def get_seconds_left(self):
         return self.timesync.server_datetime.second
 
-    def sell(self):
-        self.api.buy(1, 1, "turbo", "put")
+    def sell(self, amount=1):
+        self.api.buy(amount, 1, "turbo", "put")
 
-    def buy(self):
-        self.api.buy(1, 1, "turbo", "call")
+    def buy(self, amount=1):
+        self.api.buy(amount, 1, "turbo", "call")

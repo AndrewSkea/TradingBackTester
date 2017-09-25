@@ -1,10 +1,10 @@
-import os
+import cProfile
 import databases
 import loaddata
 import constants
 import patternrecognition
 from methods import macd
-
+import pstats
 
 class Main(object):
     """
@@ -33,7 +33,7 @@ class Main(object):
         # this is the tuple of the arrays of the patterns we will consider for the indicators to work
         _indicator_data_array_tuple = self.start_loading_data(all_data_array=_past_data[2])
         # Starts the recognition part of the program
-        self.start_pattern_recognition(_data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple)
+        return self.start_pattern_recognition(_data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple)
 
     def start_db(self):
         """
@@ -77,21 +77,27 @@ class Main(object):
         macd_class.calculate_initial_signal_array()
         macd_class.calculate_initial_crossover_array()
         # Creates recognition class instance
-        _recognition = patternrecognition.recognition.PatternRecognition(_data_array_tuple,
-                                                                         _patterns_array_tuple,
-                                                                         _indicator_data_array_tuple,
-                                                                         self.constants,
-                                                                         macd_class)
+        _recognition = patternrecognition.PatternRecognition(_data_array_tuple,
+                                                             _patterns_array_tuple,
+                                                             _indicator_data_array_tuple,
+                                                             self.constants,
+                                                             macd_class)
         # Starts the recognition on the pattern and the live data from the api in the class
-        percentage_win = _recognition.start
-        print percentage_win
+        return _recognition.start()
 
 
-# option = raw_input('Enter option: ')
-# if option == '0':
-constants = constants.Constants()
-main_class = Main(constants)
-result = main_class.start()
+option = raw_input('Profiler (y/n): ')
+if option == 'n':
+    constants = constants.Constants()
+    main_class = Main(constants)
+    main_class.start()
+else:
+    constants = constants.Constants()
+    main_class = Main(constants)
+    cProfile.run('main_class.start()', 'profiler_stats', 4)
+    p = pstats.Stats('profiler_stats')
+    p.strip_dirs().sort_stats(-1).print_stats()
+
 
 # elif option == '1':
 #     constants = constants.Constants()

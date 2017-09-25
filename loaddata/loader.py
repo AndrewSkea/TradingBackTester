@@ -1,7 +1,6 @@
 from methods.percentage_change import percent_change
 import time
 
-
 class Loader:
     """
     This is the pattern loader class. It takes all the data from the db
@@ -42,7 +41,7 @@ class Loader:
         _start_time = time.time()
         # This is the data length that is going to be used so tht it doesn't go until the end because there
         # won't be any data +30 points in the future then
-        _used_data_length = int(self._all_data_length - (2 * (self.constants.get_pattern_len()-1)) / self.constants.get_interval_size())
+        _used_data_length = int(int(self._all_data_length - (2 * (self.constants.get_pattern_len()-1))) / self.constants.get_interval_size())
         _current_index = self.constants.get_pattern_len()
         # Goes through all the data to get the percentage change through all of it
         while _current_index < _used_data_length:
