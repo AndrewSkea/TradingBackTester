@@ -8,7 +8,7 @@ from databases import LogHandler
 
 class PatternRecognition:
     def __init__(self, _data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple, constants_class,
-                 macd_class):
+                 macd_class, cci_class):
         """
         This initialises all the data that is needed in this class
         :param array_data_tuple: 
@@ -39,52 +39,57 @@ class PatternRecognition:
         self._macd = macd_class
         # Percentage Change class
         self._pc = PercentageChange(self.constants, self._pattern_array, self._performance_array)
+        # CCI Class
+        self._cci = cci_class
 
-    def recognition(self, pattern, close_value):
+    def recognition(self, pattern, close_value, low_value, high_value):
         """
         This runs the recognition process on the current pattern
+        :param high_value:
+        :param low_value:
         :param close_value:
         :param pattern:
         :return: null
         """
-        percentage_change_result = self._pc.get_result_of_pc(pattern=pattern)
+        result_array = []
+        result_array.append(self._pc.get_result_of_pc(pattern=pattern))
+
         self._macd.add_data_point(close_value)
-        macd_result = self._macd.get_result()
-        ####################################################### ADD IN CCI CLASS AS WELL AS HIGH AND LOW VALUES
+        result_array.append(self._macd.get_result())
 
-        if macd_result == enums.Direction.UP:
-            if percentage_change_result == enums.Option.BUY:
-                option = enums.Option.BUY
-                strength_of_option = 10
-            elif percentage_change_result == enums.Option.SELL:
-                option = enums.Option.SELL
-                strength_of_option = 3
+        self._cci.add_to_cci_array(close_value, high_value, low_value)
+        cci_result, cci_strength = self._cci.get_cci_array_()
+        result_array.append(cci_result)
+        cci_strength *= 100
+
+        for i in result_array:
+            if i == enums.Option.BUY:
+                result_array[i] = 1
+            elif i == enums.Option.SELL:
+                result_array[i] = 0
             else:
-                option = enums.Option.BUY
-                strength_of_option = 2
-        elif macd_result == enums.Direction.DOWN:
-            if percentage_change_result == enums.Option.BUY:
-                option = enums.Option.BUY
-                strength_of_option = 3
-            elif percentage_change_result == enums.Option.SELL:
-                option = enums.Option.SELL
-                strength_of_option = 10
-            else:
-                option = enums.Option.SELL
-                strength_of_option = 2
+                result_array[i] = -1
+
+        if result_array == (0, 0, 0):
+            return enums.Option.BUY, cci_strength + 1
+        elif result_array == (0, 0, 1):
+            return enums.Option.BUY, cci_strength + 2
+        elif result_array == (0, 1, 0):
+            return enums.Option.BUY, cci_strength + 3
+        elif result_array == (0, 1, 1):
+            return enums.Option.BUY, cci_strength + 4
+        elif result_array == (1, 0, 0):
+            return enums.Option.BUY, cci_strength + 5
+        elif result_array == (1, 0, 1):
+            return enums.Option.BUY, cci_strength + 6
+        elif result_array == (1, 1, 0):
+            return enums.Option.BUY, cci_strength + 7
+        elif result_array == (-1, 1, 1):
+            return enums.Option.BUY, cci_strength + 8
+        elif result_array == (1, 1, 1):
+            return enums.Option.BUY, cci_strength + 9
         else:
-            # No patterns have been found or criteria not met
-            if percentage_change_result == enums.Option.BUY:
-                option = enums.Option.BUY
-                strength_of_option = 1
-            elif percentage_change_result == enums.Option.SELL:
-                option = enums.Option.SELL
-                strength_of_option = 1
-            else:
-                option = enums.Option.NO_TRADE
-                strength_of_option = 0
-
-        return option, strength_of_option
+            return enums.Option.NO_TRADE, 0
 
     def no_patterns(self, final_time):
         """
@@ -111,7 +116,8 @@ class PatternRecognition:
         while index < max_iterations - 1:
             # Run recognition on the current pattern
             _start_time = time.time()
-            option, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index])
+            option, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
+                                                          self._low[index], self._high[index])
             _end_time = time.time() - _start_time
             if option == enums.Option.NO_TRADE:
                 _num_no_trades += 1
@@ -158,7 +164,7 @@ class PatternRecognition:
 
         _percentage_win = float(_num_wins) / float(_num_loses + _num_draws + _num_wins)
 
-        print '\n\n\n\nPercentage win = ',("%.2f" % round(_percentage_win*100,2)), '%\n', \
+        print '\n\n\n\nPercentage win = ', ("%.2f" % round(_percentage_win * 100, 2)), '%\n', \
             '_num_wins_strength_1  = ', _num_wins_strength_1, '\n', \
             '_num_wins_strength_2  = ', _num_wins_strength_2, '\n', \
             '_num_wins_strength_3  = ', _num_wins_strength_3, '\n', \

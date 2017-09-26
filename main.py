@@ -4,6 +4,7 @@ import loaddata
 import constants
 import patternrecognition
 from methods import macd
+from methods import cci
 import pstats
 
 class Main(object):
@@ -67,6 +68,7 @@ class Main(object):
     def start_pattern_recognition(self, _data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple):
         """
         Starts the recognition with the tuple of data and performance arrays
+        :param _indicator_data_array_tuple:
         :param _patterns_array_tuple:
         :param _data_array_tuple: the tuple of buy and sell data and performance arrays
         :return:
@@ -76,12 +78,17 @@ class Main(object):
         macd_class.calculate_initial_macd_array()
         macd_class.calculate_initial_signal_array()
         macd_class.calculate_initial_crossover_array()
+        # This creates the CCI class instance and starts all the initial calculations
+        cci_class = cci.CCI(_data_array_tuple, self.constants)
+        cci_class.calculate_cci_initial_array()
+
         # Creates recognition class instance
         _recognition = patternrecognition.PatternRecognition(_data_array_tuple,
                                                              _patterns_array_tuple,
                                                              _indicator_data_array_tuple,
                                                              self.constants,
-                                                             macd_class)
+                                                             macd_class,
+                                                             cci_class)
         # Starts the recognition on the pattern and the live data from the api in the class
         return _recognition.start()
 

@@ -1,4 +1,4 @@
-from enums.enums import Position, Direction
+from enums.enums import Position, Direction, Option
 from methods import ema
 import time
 
@@ -109,7 +109,13 @@ class MACD:
         # If there is a new value on the array
         if self._is_new_value:
             self._is_new_value = False
-            return self._crossover_array[-1]
+            if self._crossover_array[-1] == Direction.UP:
+                option = Option.BUY
+            elif self._crossover_array[-1] == Direction.DOWN:
+                option = Option.SELL
+            else:
+                option = Option.NO_TRADE
+            return option
         else:
             self._is_new_value = False
             return None

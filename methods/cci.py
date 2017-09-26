@@ -1,5 +1,5 @@
 from methods.typical_price import TypicalPrice
-
+from enums.enums import Option
 
 class CCI:
     """
@@ -17,9 +17,13 @@ class CCI:
         self._cci_period = self._constant_class.get_cci_period()
         # This is the Typical Price array class that this class will use
         self._tp_class = TypicalPrice(data_point_tuples, self._constant_class)
+        # This makes the tp class calculate the initial tp array
         self._tp_array = self._tp_class.calculate_initial_array()
+        # This makes the tp class calculate the sma array for the tp
         self._tp_sma_array = self._tp_class.calculate_initial_sma_of_tp()
+        # This makes the tp class calculate the standard deviation array for the tp class
         self._sd_array = self._tp_class.calculate_initial_sd_array()
+        print 'FINISHED CALCULATING'
 
     def calculate_cci_initial_array(self):
         for i in range(len(self._sd_array)):
@@ -35,5 +39,34 @@ class CCI:
     def get_cci_array_(self):
         return self._cci_array
 
-    def get_result(self):
-        return self._cci_array[-1]
+    def get_result(self):#
+        option = Option.NO_TRADE
+        num = self.get_amount_of_consecutive_times_cci_is_overtraded()
+        if num != None:
+            if num > 0:
+                option = Option.SELL
+            else:
+                option = Option.BUY
+        return option, num
+
+    def get_amount_of_consecutive_times_cci_is_overtraded(self):
+        """
+        This returns the amount times the cci has been overtraded. So, if the last few values have been under -100 or
+        above 100, it counts the amount of times, this has happened and returns the value
+        :return: The number of consecutive times the cci has been over traded
+        """
+        if self._cci_array[-1] < -100:
+            for i in range(len(self._cci_array)):
+                if self._cci_array[-i] < -100:
+                    continue
+                else:
+                    return i
+        elif self._cci_array[-1] > 100:
+            for i in range(len(self._cci_array)):
+                if self._cci_array[-i] > 100:
+                    continue
+                else:
+                    return i
+        else:
+            return 0
+

@@ -54,7 +54,7 @@ class TypicalPrice:
         return self._sma_of_tp
 
     def calculate_initial_sd_array(self):
-        for i in self._sma_of_tp:
+        for i in range(len(self._sma_of_tp)):
             temp_num = 0
             for j in range(i, i + self._sma_period, 1):
                 temp_num += abs(i - self._typical_price_array[j])
