@@ -32,7 +32,7 @@ class Constants:
 
         ### THESE DON'T CHANGE DURING THE GENETIC ALGORITHM AS THEY ARE STATIC CONSTANTS, ONLY GETTERS ###
         # Number of the live patterns we are using (It will load always around 100 less than this number)
-        self._num_live_patterns = 100
+        self._num_live_patterns = 4000
         # Number of data points we use to compare the live patterns against
         self._num_data_points = 250000
         # Number of points the indicators have to run their ema and macd
