@@ -97,7 +97,9 @@ class Main(object):
 
 constants = constants.Constants()
 main_class = Main(constants)
-main_class.start()
+cProfile.run('main_class.start()', 'profiler_stats', 4)
+p = pstats.Stats('profiler_stats')
+p.strip_dirs().sort_stats(-1).print_stats()
 
 
 # option = raw_input('Profiler (y/n): ')

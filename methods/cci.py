@@ -26,7 +26,6 @@ class CCI:
         # This makes the tp class calculate the standard deviation array for the tp class
         self._tp_class.calculate_initial_sd_array()
         self._sd_array = self._tp_class.get_standard_deviation_array_for_tp()
-        print 'finished calc'
 
     def calculate_cci_initial_array(self):
         print len(self._tp_array)
@@ -48,15 +47,20 @@ class CCI:
     def get_cci_array_(self):
         return self._cci_array
 
-    def get_result(self):#
+    def get_result(self):
         option = Option.NO_TRADE
-        num = self.get_amount_of_consecutive_times_cci_is_overtraded()
-        if num != None:
-            if num > 0:
-                option = Option.SELL
-            else:
-                option = Option.BUY
-        return option, num
+        if self._cci_array[-1] > 100:
+            option = Option.SELL
+        elif self._cci_array[-1] < -100:
+            option = Option.BUY
+        return option, 0
+        # num = self.get_amount_of_consecutive_times_cci_is_overtraded()
+        # if num is not None:
+        #     if num > 0:
+        #         option = Option.SELL
+        #     else:
+        #         option = Option.BUY
+        # return option, num
 
     def get_amount_of_consecutive_times_cci_is_overtraded(self):
         """
