@@ -58,38 +58,50 @@ class PatternRecognition:
         result_array.append(self._macd.get_result())
 
         self._cci.add_to_cci_array(close_value, high_value, low_value)
-        cci_result, cci_strength = self._cci.get_cci_array_()
+        cci_result, cci_strength = self._cci.get_result()
         result_array.append(cci_result)
         cci_strength *= 100
 
+        index_of_array = 0
         for i in result_array:
             if i == enums.Option.BUY:
-                result_array[i] = 1
+                result_array[index_of_array] = 1
             elif i == enums.Option.SELL:
-                result_array[i] = 0
+                result_array[index_of_array] = 0
             else:
-                result_array[i] = -1
+                result_array[index_of_array] = -1
+            index_of_array += 1
 
-        if result_array == (0, 0, 0):
-            return enums.Option.BUY, cci_strength + 1
-        elif result_array == (0, 0, 1):
-            return enums.Option.BUY, cci_strength + 2
-        elif result_array == (0, 1, 0):
-            return enums.Option.BUY, cci_strength + 3
-        elif result_array == (0, 1, 1):
-            return enums.Option.BUY, cci_strength + 4
-        elif result_array == (1, 0, 0):
-            return enums.Option.BUY, cci_strength + 5
-        elif result_array == (1, 0, 1):
-            return enums.Option.BUY, cci_strength + 6
-        elif result_array == (1, 1, 0):
-            return enums.Option.BUY, cci_strength + 7
-        elif result_array == (-1, 1, 1):
-            return enums.Option.BUY, cci_strength + 8
-        elif result_array == (1, 1, 1):
-            return enums.Option.BUY, cci_strength + 9
-        else:
-            return enums.Option.NO_TRADE, 0
+        print result_array
+
+        return tuple(result_array), cci_strength
+
+        #  if r == (0, 0, 0):
+        #     return enums.Option.SELL, cci_strength + 20
+        # elif r ==
+        # elif r == (1, 1, 1):
+        #     return enums.Option.BUY, cci_strength + 20
+        #
+        # if r == (0, 0, 0):
+        #     return enums.Option.BUY, cci_strength + 1
+        # elif r == (0, 0, 1):
+        #     return enums.Option.BUY, cci_strength + 2
+        # elif r == (0, 1, 0):
+        #     return enums.Option.BUY, cci_strength + 3
+        # elif r == (0, 1, 1):
+        #     return enums.Option.BUY, cci_strength + 4
+        # elif r == (1, 0, 0):
+        #     return enums.Option.BUY, cci_strength + 5
+        # elif r == (1, 0, 1):
+        #     return enums.Option.BUY, cci_strength + 6
+        # elif r == (1, 1, 0):
+        #     return enums.Option.BUY, cci_strength + 7
+        # elif r == (-1, 1, 1):
+        #     return enums.Option.BUY, cci_strength + 8
+        # elif r == (1, 1, 1):
+        #     return enums.Option.BUY, cci_strength + 9
+        # else:
+        #     return enums.Option.NO_TRADE, 0
 
     def no_patterns(self, final_time):
         """
@@ -108,97 +120,94 @@ class PatternRecognition:
         :return:
         """
         result_array = []
+        result_dict = {}
+        for i in range(-1, 2, 1):
+            for j in range(-1, 2, 1):
+                for k in range(-1, 2, 1):
+                    result_array.append((i, j, k))
+
+        result_dict = {result_array[i]: [0, 0, 0] for i in range(len(result_array))}
+
         # Number of patterns there are
         max_iterations = len(self.pattern_data_tuples[0])
         print 'Number of iterations: ', max_iterations
-        _num_no_trades = 0
         index = 0
         while index < max_iterations - 1:
             # Run recognition on the current pattern
             _start_time = time.time()
-            option, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
+            result_tuple, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
                                                           self._low[index], self._high[index])
             _end_time = time.time() - _start_time
-            if option == enums.Option.NO_TRADE:
-                _num_no_trades += 1
-                print index, ' - No Trades in ', _end_time
+            if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
+                result_dict[result_tuple][0] += 1
+                print index, ' - BUY x ', strength_of_option, 'in ', _end_time
+            elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
+                result_dict[result_tuple][1] += 1
+                print index, ' - SELL x ', strength_of_option, 'in ', _end_time
             else:
-                if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
-                    if option == enums.Option.BUY:
-                        result_array.append((1, strength_of_option))
-                        print index, ' - WIN x ', strength_of_option, 'in ', _end_time
-                    elif option == enums.Option.SELL:
-                        result_array.append((-1, strength_of_option))
-                        print index, ' - LOSE x ', strength_of_option, 'in ', _end_time
-                elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
-                    if option == enums.Option.BUY:
-                        result_array.append((-1, strength_of_option))
-                        print index, ' - LOSE x ', strength_of_option, 'in ', _end_time
-                    elif option == enums.Option.SELL:
-                        result_array.append((1, strength_of_option))
-                        print index, ' - WIN x ', strength_of_option, 'in ', _end_time
-                else:
-                    result_array.append((0, strength_of_option))
-                    print index, ' - DRAW x ', strength_of_option, 'in ', _end_time
+                result_dict[result_tuple][2] += 1
+                print index, ' - DRAW x ', strength_of_option, 'in ', _end_time
             index += 1
 
-        return self.log_and_get_percentage_win(result_array, _num_no_trades, max_iterations)
+        return self.log_and_get_percentage_win(result_dict, max_iterations)
 
-    def log_and_get_percentage_win(self, result_array, _num_no_trades, max_iterations):
+    def log_and_get_percentage_win(self, result_dict, max_iterations):
 
-        _num_wins_strength_1 = result_array.count((1, 1))
-        _num_wins_strength_2 = result_array.count((1, 2))
-        _num_wins_strength_3 = result_array.count((1, 3))
-        _num_wins_strength_10 = result_array.count((1, 10))
-        _num_loses_strength_1 = result_array.count((-1, 1))
-        _num_loses_strength_2 = result_array.count((-1, 2))
-        _num_loses_strength_3 = result_array.count((-1, 3))
-        _num_loses_strength_10 = result_array.count((-1, 10))
-        _num_draws_strength_0 = result_array.count((0, 0))
+        # num_wins
+        #
+        # _num_wins = _num_wins_strength_1 + _num_wins_strength_2 + _num_wins_strength_3 + _num_wins_strength_10
+        # _num_loses = _num_loses_strength_1 + _num_loses_strength_2 + _num_loses_strength_3 + _num_loses_strength_10
+        # _num_draws = _num_draws_strength_0
+        # _total_num_iterations = _num_wins + _num_loses + _num_draws + _num_no_trades
+        # _rest_of_iterations = max_iterations - _total_num_iterations
+        #
+        # _percentage_win = float(_num_wins) / float(_num_loses + _num_draws + _num_wins)
+        #
+        # print '\n\n\n\nPercentage win = ', ("%.2f" % round(_percentage_win * 100, 2)), '%\n', \
+        #     '_num_wins_strength_1  = ', _num_wins_strength_1, '\n', \
+        #     '_num_wins_strength_2  = ', _num_wins_strength_2, '\n', \
+        #     '_num_wins_strength_3  = ', _num_wins_strength_3, '\n', \
+        #     '_num_wins_strength_10 = ', _num_wins_strength_10, '\n', \
+        #     '_num_loses_strength_1 = ', _num_loses_strength_1, '\n', \
+        #     '_num_loses_strength_2 = ', _num_loses_strength_2, '\n', \
+        #     '_num_loses_strength_3 = ', _num_loses_strength_3, '\n', \
+        #     '_num_loses_strength_10 = ', _num_loses_strength_10, '\n', \
+        #     '_num_draws_strength_0 = ', _num_draws_strength_0, '\n', \
+        #     '_num_no_trades = ', _num_no_trades, '\n', \
+        #     '_total_num_iterations = ', _total_num_iterations
+        #
+        # result_csv_string = ',{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(
+        #     _percentage_win,
+        #     _num_wins_strength_1,
+        #     _num_wins_strength_2,
+        #     _num_wins_strength_3,
+        #     _num_wins_strength_10,
+        #     _num_loses_strength_1,
+        #     _num_loses_strength_2,
+        #     _num_loses_strength_3,
+        #     _num_loses_strength_10,
+        #     _num_draws_strength_0,
+        #     _num_no_trades,
+        #     _total_num_iterations,
+        #     _rest_of_iterations)
+        #
+        # log_string = self.constants.get_csv_str() + result_csv_string
+        #
+        # f = open("logdata/log.csv", 'a')
+        # f.write(log_string)
+        # f.close()
+        # return _percentage_win
+        self.constants.get_num_live_patterns()
+        log_string = '\n\n\n\n' + str(self.constants.get_num_live_patterns()) + "\ntuple,bought,sold,drawed\n"
+        for key, value in result_dict.iteritems():
+            log_string += "{},{},{},{}\n".format(key, value[0], value[1], value[2])
 
-        _num_wins = _num_wins_strength_1 + _num_wins_strength_2 + _num_wins_strength_3 + _num_wins_strength_10
-        _num_loses = _num_loses_strength_1 + _num_loses_strength_2 + _num_loses_strength_3 + _num_loses_strength_10
-        _num_draws = _num_draws_strength_0
-        _total_num_iterations = _num_wins + _num_loses + _num_draws + _num_no_trades
-        _rest_of_iterations = max_iterations - _total_num_iterations
-
-        _percentage_win = float(_num_wins) / float(_num_loses + _num_draws + _num_wins)
-
-        print '\n\n\n\nPercentage win = ', ("%.2f" % round(_percentage_win * 100, 2)), '%\n', \
-            '_num_wins_strength_1  = ', _num_wins_strength_1, '\n', \
-            '_num_wins_strength_2  = ', _num_wins_strength_2, '\n', \
-            '_num_wins_strength_3  = ', _num_wins_strength_3, '\n', \
-            '_num_wins_strength_10 = ', _num_wins_strength_10, '\n', \
-            '_num_loses_strength_1 = ', _num_loses_strength_1, '\n', \
-            '_num_loses_strength_2 = ', _num_loses_strength_2, '\n', \
-            '_num_loses_strength_3 = ', _num_loses_strength_3, '\n', \
-            '_num_loses_strength_10 = ', _num_loses_strength_10, '\n', \
-            '_num_draws_strength_0 = ', _num_draws_strength_0, '\n', \
-            '_num_no_trades = ', _num_no_trades, '\n', \
-            '_total_num_iterations = ', _total_num_iterations
-
-        result_csv_string = ',{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(
-            _percentage_win,
-            _num_wins_strength_1,
-            _num_wins_strength_2,
-            _num_wins_strength_3,
-            _num_wins_strength_10,
-            _num_loses_strength_1,
-            _num_loses_strength_2,
-            _num_loses_strength_3,
-            _num_loses_strength_10,
-            _num_draws_strength_0,
-            _num_no_trades,
-            _total_num_iterations,
-            _rest_of_iterations)
-
-        log_string = self.constants.get_csv_str() + result_csv_string
-
+        print log_string
         f = open("logdata/log.csv", 'a')
         f.write(log_string)
         f.close()
-        return _percentage_win
+        return 0
 
     # This is put in to avoid errors but I don't know why it is needed so leave it in
     if __name__ == '__main__':
-        print 'this has been called by the __main__ thing which is bad'
+        print 'this has been called by the __main__ thing which is bad, this is needed for go knows what reason'

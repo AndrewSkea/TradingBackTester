@@ -37,7 +37,7 @@ class PercentageChange:
             _each_pattern = self._pattern_array[b]
             # Goes through the pattern and sees if each percentage change is within the right limit, else continue
             for i in range(0, self.constants.get_pattern_len() - 1, 1):
-                if abs(percent_change(_each_pattern[i], pattern[i])) > 350:
+                if abs(percent_change(_each_pattern[i], pattern[i])) > 500:
                     _should_skip = True
                     break
             # Only skips if one of the data points is too far out and doesn't meet the requirement
@@ -56,7 +56,7 @@ class PercentageChange:
         # If the number is greater than the required amount, it can continue
         if _num_patterns_found > self.constants.get_num_pattern_req():
             # It averages the outcome of all the numbers in the array to get an average outcome
-            _predicted_avg_outcome = sum(_predicted_outcomes_array) / len(_predicted_outcomes_array)
+            _predicted_avg_outcome = reduce(lambda x, y: x + y, _predicted_outcomes_array) / _num_patterns_found
 
             # It then decides whether the 'difference' is great enough to be worthy of a trade
             # Initialises the _option to N/A in case that there is not the required difference, it won't cause an error
@@ -74,3 +74,5 @@ class PercentageChange:
             else:
                 # No patterns have been found or criteria not met
                 return None
+        else:
+            return None
