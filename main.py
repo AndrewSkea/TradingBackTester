@@ -94,14 +94,6 @@ class Main(object):
 
 
 
-
-constants = constants.Constants()
-main_class = Main(constants)
-cProfile.run('main_class.start()', 'profiler_stats', 4)
-p = pstats.Stats('profiler_stats')
-p.strip_dirs().sort_stats(-1).print_stats()
-
-
 # option = raw_input('Profiler (y/n): ')
 # if option == 'n':
 #     constants = constants.Constants()
