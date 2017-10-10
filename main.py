@@ -7,6 +7,7 @@ from methods import macd
 from methods import cci
 import pstats
 
+
 class Main(object):
     """
     Where the main thread of execution begins
@@ -93,6 +94,9 @@ class Main(object):
         return _recognition.start()
 
 
+constants = constants.Constants()
+main_class = Main(constants)
+main_class.start()
 
 # option = raw_input('Profiler (y/n): ')
 # if option == 'n':

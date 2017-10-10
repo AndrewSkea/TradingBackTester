@@ -10,8 +10,12 @@ class PatternRecognition:
     def __init__(self, _data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple, constants_class,
                  macd_class, cci_class):
         """
-        This initialises all the data that is needed in this class
-        :param array_data_tuple: 
+        :param _data_array_tuple:
+        :param _patterns_array_tuple:
+        :param _indicator_data_array_tuple:
+        :param constants_class:
+        :param macd_class:
+        :param cci_class:
         """
         # Instance for the constants class
         self.constants = constants_class
@@ -26,11 +30,11 @@ class PatternRecognition:
         # This is the array that has the historic data patterns that end up selling
         self._time = array_data_tuple[2]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._high = array_data_tuple[3]
+        self._high = array_data_tuple[4]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._low = array_data_tuple[4]
+        self._low = array_data_tuple[5]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._close = array_data_tuple[5]
+        self._close = array_data_tuple[6]
         # Instance of Log handler
         self._log_handler = LogHandler()
         # Number of bets
@@ -52,8 +56,8 @@ class PatternRecognition:
         :return: null
         """
         result_array = []
-        result_array.append(self._pc.get_result_of_pc(pattern=pattern))
-
+        # result_array.append(self._pc.get_result_of_pc(pattern=pattern))
+        result_array.append(enums.Option.NO_TRADE)
         self._macd.add_data_point(close_value)
         result_array.append(self._macd.get_result())
 
@@ -71,8 +75,6 @@ class PatternRecognition:
             else:
                 result_array[index_of_array] = -1
             index_of_array += 1
-
-        print result_array
 
         return tuple(result_array), cci_strength
 
@@ -140,13 +142,16 @@ class PatternRecognition:
             _end_time = time.time() - _start_time
             if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
                 result_dict[result_tuple][0] += 1
-                print index, ' - BUY x ', strength_of_option, 'in ', _end_time
+                # print index, ' - BUY x ', strength_of_option, 'in ', _end_time
             elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
                 result_dict[result_tuple][1] += 1
-                print index, ' - SELL x ', strength_of_option, 'in ', _end_time
-            else:
+                # print index, ' - SELL x ', strength_of_option, 'in ', _end_time
+            elif self.pattern_data_tuples[0][index] == self.pattern_data_tuples[0][index + 1]:
                 result_dict[result_tuple][2] += 1
-                print index, ' - DRAW x ', strength_of_option, 'in ', _end_time
+                # print index, ' - DRAW x ', strength_of_option, 'in ', _end_time
+            else:
+                # print index, ' - NO TRADE x ', strength_of_option, 'in ', _end_time
+                pass
             index += 1
 
         return self.log_and_get_percentage_win(result_dict, max_iterations)

@@ -8,11 +8,11 @@ class TypicalPrice:
         # This is the typical price array
         self._typical_price_array = []
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._high = array_data_tuple[3]
+        self._high = array_data_tuple[4]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._low = array_data_tuple[4]
+        self._low = array_data_tuple[5]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._close = array_data_tuple[5]
+        self._close = array_data_tuple[6]
         # THis is the SMA class - This isn't set yet because we are passing in the data as a parameter to the class
         self._sma_class = None
         # This is the sma of the Typical Price

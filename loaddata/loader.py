@@ -36,7 +36,7 @@ class Loader:
     def pattern_storage(self):
         """
         This uses the full data set to split it into the 4 different arrays described above
-        :return: tuple of the 4 different arrays
+        :return: tuple of the 7 different arrays
         """
         _start_time = time.time()
         # This is the data length that is going to be used so tht it doesn't go until the end because there
@@ -64,7 +64,9 @@ class Loader:
             self._close_price.append(self._all_data[_current_index][5])
 
             _current_index += 1
+
         print '{} patterns processed in {} s'.format(len(self._pattern_array), time.time() - _start_time)
+
         return (self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price,
                 self._low_price, self._close_price)
 

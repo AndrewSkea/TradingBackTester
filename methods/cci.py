@@ -1,6 +1,7 @@
 from methods.typical_price import TypicalPrice
 from enums.enums import Option
 
+
 class CCI:
     """
     This is the CCI class that takes calculates, and provides CCI data on the patterns
@@ -28,9 +29,10 @@ class CCI:
         self._sd_array = self._tp_class.get_standard_deviation_array_for_tp()
 
     def calculate_cci_initial_array(self):
-        print len(self._tp_array)
-        print len(self._tp_sma_array)
-        print len(self._sd_array)
+        """
+        This calculates the cci initial array
+        :return:
+        """
         for i in range(len(self._sd_array)):
             try:
                 self._cci_array.append((self._tp_array[i + (self._cci_period - 1)] - self._tp_sma_array[i]) /
@@ -42,16 +44,29 @@ class CCI:
         self._tp_class.add_last_point(close, high, low)
         self._tp_class.add_to_sma_array()
         self._tp_class.add_to_standard_deviation_array()
-        self._cci_array.append((self._tp_array[-1] - self._tp_sma_array[-1])/(self._cci_constant * self._sd_array[-1]))
+        self.update_arrays()
+        self._cci_array.append(
+            (self._tp_array[-1] - self._tp_sma_array[-1]) / (self._cci_constant * self._sd_array[-1]))
+
+    def update_arrays(self):
+        self._tp_array = self._tp_class.get_typical_price_array()
+        self._tp_sma_array = self._tp_class.get_sma_array_for_tp()
+        self._sd_array = self._tp_class.get_standard_deviation_array_for_tp()
+        # print self._tp_array[-1]
+        # print self._tp_sma_array[-1]
+        # print self._sd_array[-1]
 
     def get_cci_array_(self):
         return self._cci_array
 
     def get_result(self):
+        print self._cci_array[-1]
         option = Option.NO_TRADE
         if self._cci_array[-1] > 100:
+            print 'CCI SELL'
             option = Option.SELL
         elif self._cci_array[-1] < -100:
+            print 'CCI BUY'
             option = Option.BUY
         return option, 0
         # num = self.get_amount_of_consecutive_times_cci_is_overtraded()
@@ -82,4 +97,3 @@ class CCI:
                     return i
         else:
             return 0
-
