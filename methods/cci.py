@@ -52,9 +52,6 @@ class CCI:
         self._tp_array = self._tp_class.get_typical_price_array()
         self._tp_sma_array = self._tp_class.get_sma_array_for_tp()
         self._sd_array = self._tp_class.get_standard_deviation_array_for_tp()
-        # print self._tp_array[-1]
-        # print self._tp_sma_array[-1]
-        # print self._sd_array[-1]
 
     def get_cci_array_(self):
         return self._cci_array

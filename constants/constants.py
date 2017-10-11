@@ -18,17 +18,19 @@ class Constants:
         # Number of the live patterns we are using
         self._cut_off = 100
         # The period for ema 1 for the macd
-        self._ema_a_period = 12
+        self._ema_a_period = 25
         # The period for ema 2 for the macd
-        self._ema_b_period = 26
+        self._ema_b_period = 60
         # The signal period done on the macd
-        self._signal_period = 9
+        self._signal_period = 15
         # This is the CCI period
         self._cci_period = 20
         # This is the CCI constant
         self._cci_constant = 0.015
         # This is the typical price ema period
-        self._typical_price_ema_period = 20
+        self._typical_price_sma_period = 20
+        # This is the sma period for the bollinger band
+        self._bollinger_band_sma_period = 100
 
         ### THESE DON'T CHANGE DURING THE GENETIC ALGORITHM AS THEY ARE STATIC CONSTANTS, ONLY GETTERS ###
         # Number of the live patterns we are using (It will load always around 100 less than this number)
@@ -182,7 +184,7 @@ class Constants:
         :param num: The number to set it to
         :return: None
         """
-        self._typical_price_ema_period = num
+        self._typical_price_sma_period = num
 
     def get_pattern_len(self):
         """
@@ -281,7 +283,7 @@ class Constants:
         This returns the typical price period for the ema
         :return:
         """
-        return self._typical_price_ema_period
+        return self._typical_price_sma_period
 
     def get_csv_str(self):
         """

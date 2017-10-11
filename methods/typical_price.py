@@ -1,5 +1,5 @@
 from methods.sma import SMA
-
+from math import sqrt
 
 class TypicalPrice:
     def __init__(self, array_data_tuple, constants_class):
