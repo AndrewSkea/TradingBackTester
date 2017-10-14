@@ -80,7 +80,10 @@ class BollingerBands:
         self._band_width.append(abs(self._upper_band[-1] - self._lower_band[-1]))
 
     def get_result(self):
-        # print 'Band width: ', self._band_width[-1]
-        # NEED TO DO THIS
-        return Option.NO_TRADE
+        if self._all_close_prices[-1] < self._lower_band[-1]:
+            return Option.BUY
+        elif self._all_close_prices[-1] > self._upper_band[-1]:
+            return Option.SELL
+        else:
+            return Option.NO_TRADE
 

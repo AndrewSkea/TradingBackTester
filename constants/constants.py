@@ -1,3 +1,5 @@
+from terminaltables import AsciiTable
+
 
 class Constants:
     def __init__(self):
@@ -24,23 +26,23 @@ class Constants:
         # The signal period done on the macd
         self._signal_period = 15
         # This is the CCI period
-        self._cci_period = 20
+        self._cci_period = 50
         # This is the CCI constant
         self._cci_constant = 0.015
         # This is the CCI limit
         self._cci_limit = 200
         # This is the typical price ema period
-        self._typical_price_sma_period = 20
+        self._typical_price_sma_period = 50
         # This is the sma period for the bollinger band
         self._bollinger_band_sma_period = 20
 
         ### THESE DON'T CHANGE DURING THE GENETIC ALGORITHM AS THEY ARE STATIC CONSTANTS, ONLY GETTERS ###
         # Number of the live patterns we are using (It will load always around 100 less than this number)
-        self._num_live_patterns = 50000
+        self._num_live_patterns = 110000
         # Number of data points we use to compare the live patterns against
-        self._num_data_points = 125000
+        self._num_data_points = 250000
         # Number of points the indicators have to run their ema and macd
-        self._num_data_points_for_indicators = 25000
+        self._num_data_points_for_indicators = 50000
         # The decimal places the indicators round to (prevents too many calculations)
         self._indicator_num_decimal_points = 8
 
@@ -296,7 +298,7 @@ class Constants:
         """
         return self._cci_period
 
-    def get_typical_price_ema_period(self):
+    def get_typical_price_sma_period(self):
         """
         This returns the typical price period for the ema
         :return:
@@ -336,8 +338,26 @@ class Constants:
             self.get_signal_period(),
             self.get_cci_period(),
             self.get_cci_constant(),
-            self.get_typical_price_ema_period(),
+            self.get_typical_price_sma_period(),
             self.get_bollinger_band_sma_period(),
             self.get_cci_limit())
 
+    def get_str_table(self):
+        table_data = [["Constant Name", "Value"]]
+        table_data.append(["Pattern Length", self.get_pattern_len()])
+        table_data.append(["Number Patterns required", self.get_num_pattern_req()])
+        table_data.append(["Pattern difference required", self.get_required_difference()])
+        table_data.append(["Interval size", self.get_interval_size()])
+        table_data.append(["Number Live Patterns", self.get_num_live_patterns()])
+        table_data.append(["Number data points", self.get_num_data_points()])
+        table_data.append(["MACD EMA A period", self.get_ema_a_period()])
+        table_data.append(["MACD EMA B period", self.get_ema_b_period()])
+        table_data.append(["MACD Signal Period", self.get_signal_period()])
+        table_data.append(["CCI Period", self.get_cci_period()])
+        table_data.append(["CCI Constant", self.get_cci_constant()])
+        table_data.append(["Typical Price SMA period", self.get_typical_price_sma_period()])
+        table_data.append(["Bollinger Band SMA period", self.get_bollinger_band_sma_period()])
+        table_data.append(["CCI Limit", self.get_cci_limit()])
 
+        table = AsciiTable(table_data)
+        return table.table

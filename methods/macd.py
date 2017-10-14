@@ -99,7 +99,7 @@ class MACD:
             self._last_position = self._position
             self._is_new_value = True
 
-        print 'len of crossover array', len(self._crossover_array)
+        print 'Number of MACD crossovers in initial array: ', len(self._crossover_array)
 
     def get_result(self):
         """

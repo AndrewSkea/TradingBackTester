@@ -68,8 +68,6 @@ class Loader:
 
         #self.make_into_different_candles()
 
-        print '{} patterns processed in {} s\n'.format(len(self._pattern_array), time.time() - _start_time)
-
         return self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price, self._low_price, self._close_price
 
     def make_into_different_candles(self):
@@ -86,9 +84,9 @@ class Loader:
 
         for i in range(candle_period, len(self._close_price), candle_period):
             try:
-                temp_low_price.append(round(min(self._low_price[i-candle_period:i-1]), 10))
-                temp_high_price.append(round(max(self._high_price[i-candle_period:i-1]), 10))
-                temp_close_price.append(round(self._close_price[i - 1], 10))
+                temp_low_price.append(round(min(self._low_price[i-candle_period:i]), 10))
+                temp_high_price.append(round(max(self._high_price[i-candle_period:i]), 10))
+                temp_close_price.append(round(self._close_price[i], 10))
                 temp_open_price.append(round(self._open_price[i - candle_period], 10))
                 temp_time.append(self._time[i - candle_period])
             except IndexError:

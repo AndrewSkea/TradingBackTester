@@ -65,7 +65,7 @@ class PatternRecognition:
         result_array = []
         # This is getting the result of the percentage change indicator
         # result_array.append(self._pc.get_result_of_pc(pattern=pattern))
-        #result_array.append(enums.Option.NO_TRADE)
+        result_array.append(enums.Option.NO_TRADE)
 
         # THis is getting the result for the MACD indicator
         self._macd.add_data_point(close_value)
@@ -141,45 +141,45 @@ class PatternRecognition:
         for i in range(-1, 2, 1):
             for j in range(-1, 2, 1):
                 for k in range(-1, 2, 1):
-                    result_array.append((i, j, k))
+                    for l in range(-1, 2, 1):
+                        result_array.append((i, j, k, l))
 
-        result_dict = {result_array[i]: [0, 0, 0] for i in range(len(result_array))}
+        result_dict = {result_array[i]: [0, 0] for i in range(len(result_array))}
 
         # Number of patterns there are
         max_iterations = len(self.pattern_data_tuples[0])
-        print 'Number of iterations: ', max_iterations
         index = 0
         while index < max_iterations - 1:
             # Run recognition on the current pattern
-            _start_time = time.time()
             result_tuple, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
                                                           self._low[index], self._high[index])
-            _end_time = time.time() - _start_time
             if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
                 result_dict[result_tuple][0] += 1
-                # print index, ' - BUY x ', strength_of_option, 'in ', _end_time
             elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
                 result_dict[result_tuple][1] += 1
-                # print index, ' - SELL x ', strength_of_option, 'in ', _end_time
-            elif self.pattern_data_tuples[0][index] == self.pattern_data_tuples[0][index + 1]:
-                result_dict[result_tuple][2] += 1
-                # print index, ' - DRAW x ', strength_of_option, 'in ', _end_time
-            else:
-                # print index, ' - NO TRADE x ', strength_of_option, 'in ', _end_time
-                pass
             index += 1
 
         return self.log_and_get_percentage_win(result_dict, max_iterations)
 
     def log_and_get_percentage_win(self, result_dict, max_iterations):
 
-        print 'Number of iterations: ', max_iterations
-        table_data = [['Tuple', 'Bought', 'Sold']]
+        print 'Number of iterations of Live patterns: {}\n'.format(max_iterations)
+        table_data = [['Tuple (PC, MACD, CCI, BBAND)', 'Bought', 'Sold', 'Percentage Win']]
         for key, value in result_dict.iteritems():
-            table_data.append([str(key), str(value[0]), str(value[1])])
+            if value[0] != 0 and value[1] != 0:
+                percentage_win = float(100 * value[0]/float(value[0] + value[1]))
+                table_data.append([str(key), str(value[0]), str(value[1]), "%.2f" % percentage_win])
 
-        table = AsciiTable(table_data)
-        print table.table
+        results_table = AsciiTable(table_data)
+        print results_table.table
+
+        constants_class_state_table = self.constants.get_str_table()
+
+        _file = open("logdata/log.txt", 'a')
+        _file.write(constants_class_state_table)
+        _file.write("\n")
+        _file.write(results_table.table)
+        _file.close()
 
     # This is put in to avoid errors but I don't know why it is needed so leave it in
     if __name__ == '__main__':
