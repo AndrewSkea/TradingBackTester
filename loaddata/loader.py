@@ -1,6 +1,7 @@
 from methods.percentage_change import percent_change
 import time
 
+
 class Loader:
     """
     This is the pattern loader class. It takes all the data from the db
@@ -41,7 +42,8 @@ class Loader:
         _start_time = time.time()
         # This is the data length that is going to be used so tht it doesn't go until the end because there
         # won't be any data +30 points in the future then
-        _used_data_length = int(int(self._all_data_length - (2 * (self.constants.get_pattern_len()-1))) / self.constants.get_interval_size())
+        _used_data_length = int(int(
+            self._all_data_length - (2 * (self.constants.get_pattern_len() - 1))) / self.constants.get_interval_size())
         _current_index = self.constants.get_pattern_len()
         # Goes through all the data to get the percentage change through all of it
         while _current_index < _used_data_length:
@@ -64,10 +66,72 @@ class Loader:
             self._close_price.append(self._all_data[_current_index][5])
 
             _current_index += 1
+            print 'Len before 5: ', len(self._close_price)
+            self.make_into_five_minutes()
+            print 'Len after 5: {} and it should be around: {}'.format(len(self._close_price),
+                                                                       _used_data_length / len(self._close_price))
 
         print '{} patterns processed in {} s'.format(len(self._pattern_array), time.time() - _start_time)
 
         return (self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price,
                 self._low_price, self._close_price)
 
+    def make_into_five_minutes(self):
 
+        temp_pattern_array = []
+        temp_performance = []
+        temp_time = []
+        temp_open_price = []
+        temp_high_price = []
+        temp_low_price = []
+        temp_close_price = []
+
+        for i in range(5, len(self._close_price), 5):
+            try:
+                temp_low_price.append(min(self._low_price[i - 5], self._low_price[i - 4],
+                                          self._low_price[i - 3], self._low_price[i - 2],
+                                          self._low_price[i - 1]))
+                temp_high_price.append(max(self._high_price[i - 5], self._high_price[i - 4],
+                                           self._high_price[i - 3], self._high_price[i - 2],
+                                           self._high_price[i - 1]))
+                temp_close_price.append(self._close_price[i - 1])
+                temp_open_price.append(self._open_price[i - 5])
+                temp_time.append(self._time[i - 5])
+            except IndexError:
+                print 'It is not a multiple of 5, all but the last have been added'
+
+        self._close_price = temp_close_price
+        self._high_price = temp_high_price
+        self._low_price = temp_low_price
+        self._open_price = temp_open_price
+        self._time = temp_time
+
+        _used_data_length = int(int(
+            len(self._close_price) - (2 * (self.constants.get_pattern_len() - 1))) / (
+                                    5 * self.constants.get_interval_size()))
+
+        if len(self._close_price) == len(self._high_price) == len(self._low_price) == len(self._open_price) == len(
+                self._time):
+            print 'ALL DATA ARRAYS ARE EQUAL IN LENGTH WITH LENGTH: ', len(self._close_price)
+        else:
+            print 'DATA ARRAYS ARE NOT THE SAME LENGTH'
+
+        _current_index = self.constants.get_pattern_len()
+
+        while _current_index < _used_data_length:
+            pattern = []
+            for i in range(self.constants.get_pattern_len() - 2, -1, -1):
+                pattern.append(percent_change(
+                    self._close_price[_current_index - self.constants.get_pattern_len() + 1],
+                    self._close_price[_current_index - i]))
+
+            _outcome_range = self._close_price[_current_index + 1]
+            _current_point = self._close_price[_current_index]
+            _future_outcome = percent_change(_current_point, _outcome_range)
+
+            temp_pattern_array.append(pattern)
+            temp_performance.append(_future_outcome)
+
+            _current_index += 1
+        self._pattern_array = temp_pattern_array
+        self._performance_array = temp_performance
