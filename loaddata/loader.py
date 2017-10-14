@@ -64,18 +64,16 @@ class Loader:
             self._high_price.append(self._all_data[_current_index][3])
             self._low_price.append(self._all_data[_current_index][4])
             self._close_price.append(self._all_data[_current_index][5])
-
             _current_index += 1
 
         #self.make_into_different_candles()
 
         print '{} patterns processed in {} s\n'.format(len(self._pattern_array), time.time() - _start_time)
 
-        return (self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price,
-                self._low_price, self._close_price)
+        return self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price, self._low_price, self._close_price
 
     def make_into_different_candles(self):
-        candle_period = 3
+        candle_period = 5
 
         print 'Len before {}: {}'.format(candle_period, len(self._close_price))
         temp_pattern_array = []
@@ -88,10 +86,10 @@ class Loader:
 
         for i in range(candle_period, len(self._close_price), candle_period):
             try:
-                temp_low_price.append(min(self._low_price[i-candle_period:i-1]))
-                temp_high_price.append(max(self._high_price[i-candle_period:i-1]))
-                temp_close_price.append(self._close_price[i - 1])
-                temp_open_price.append(self._open_price[i - candle_period])
+                temp_low_price.append(round(min(self._low_price[i-candle_period:i-1]), 10))
+                temp_high_price.append(round(max(self._high_price[i-candle_period:i-1]), 10))
+                temp_close_price.append(round(self._close_price[i - 1], 10))
+                temp_open_price.append(round(self._open_price[i - candle_period], 10))
                 temp_time.append(self._time[i - candle_period])
             except IndexError:
                 print 'It is not a multiple of 5, all but the last have been added'
@@ -117,9 +115,9 @@ class Loader:
         while _current_index < _used_data_length:
             pattern = []
             for i in range(self.constants.get_pattern_len() - 2, -1, -1):
-                pattern.append(percent_change(
+                pattern.append(round(percent_change(
                     self._close_price[_current_index - self.constants.get_pattern_len() + 1],
-                    self._close_price[_current_index - i]))
+                    self._close_price[_current_index - i]), 10))
 
             _outcome_range = self._close_price[_current_index + 1]
             _current_point = self._close_price[_current_index]

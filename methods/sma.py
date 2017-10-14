@@ -14,7 +14,7 @@ class SMA:
         """
         # Gets the SMA of all the data
         for i in range(self._period, len(self._all_data), 1):
-            self._sma_values_array.append(reduce(lambda x, y: x + y, self._all_data[i-self._period:i]) / self._period)
+            self._sma_values_array.append(round(sum(self._all_data[i-self._period:i]) / self._period, 10))
 
     def get_result(self):
         _option = enums.Option.BUY
@@ -22,7 +22,7 @@ class SMA:
 
     def add_data_point(self, point):
         self._all_data.append(point)
-        self._sma_values_array.append(reduce(lambda x, y: x + y, self._all_data[-self._period:-1]) / self._period)
+        self._sma_values_array.append(round(sum(self._all_data[-self._period:]) / self._period, 10))
         return self._sma_values_array[-1]
 
     def get_sma_array(self):

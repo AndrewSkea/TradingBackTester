@@ -27,18 +27,20 @@ class Constants:
         self._cci_period = 20
         # This is the CCI constant
         self._cci_constant = 0.015
+        # This is the CCI limit
+        self._cci_limit = 200
         # This is the typical price ema period
         self._typical_price_sma_period = 20
         # This is the sma period for the bollinger band
-        self._bollinger_band_sma_period = 100
+        self._bollinger_band_sma_period = 20
 
         ### THESE DON'T CHANGE DURING THE GENETIC ALGORITHM AS THEY ARE STATIC CONSTANTS, ONLY GETTERS ###
         # Number of the live patterns we are using (It will load always around 100 less than this number)
-        self._num_live_patterns = 100000
+        self._num_live_patterns = 50000
         # Number of data points we use to compare the live patterns against
-        self._num_data_points = 250000
+        self._num_data_points = 125000
         # Number of points the indicators have to run their ema and macd
-        self._num_data_points_for_indicators = 50000
+        self._num_data_points_for_indicators = 25000
         # The decimal places the indicators round to (prevents too many calculations)
         self._indicator_num_decimal_points = 8
 
@@ -186,6 +188,22 @@ class Constants:
         """
         self._typical_price_sma_period = num
 
+    def set_bollinger_band_sma_period(self, num):
+        """
+        This is the setter for the bollinger band sma period
+        :param num: num to set it to
+        :return: None
+        """
+        self._bollinger_band_sma_period = num
+
+    def set_cci_limit(self, num):
+        """
+        The setter for the cci limit
+        :param num:
+        :return:
+        """
+        self._cci_limit = num
+
     def get_pattern_len(self):
         """
         The getter for the length of pattern
@@ -285,12 +303,26 @@ class Constants:
         """
         return self._typical_price_sma_period
 
+    def get_bollinger_band_sma_period(self):
+        """
+        This is the getter for the bollinger band sma period
+        :return: bollinger band
+        """
+        return self._bollinger_band_sma_period
+
+    def get_cci_limit(self):
+        """
+        The getter for the cci limit
+        :return:
+        """
+        return self._cci_limit
+
     def get_csv_str(self):
         """
         This return the csv format for the state on the constants class it is in right now
         :return: The CSV string
         """
-        return '{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(
+        return '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(
             self.get_pattern_len(),
             self.get_num_pattern_req(),
             self.get_required_difference(),
@@ -304,6 +336,8 @@ class Constants:
             self.get_signal_period(),
             self.get_cci_period(),
             self.get_cci_constant(),
-            self.get_typical_price_ema_period())
+            self.get_typical_price_ema_period(),
+            self.get_bollinger_band_sma_period(),
+            self.get_cci_limit())
 
 
