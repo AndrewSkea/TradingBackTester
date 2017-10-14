@@ -1,7 +1,7 @@
+from math import sqrt
 
 
 class BollingerBands:
-
     def __init__(self, constants_class, close_price):
         # This is the set of close prices
         self._all_close_prices = close_price
@@ -33,4 +33,4 @@ class BollingerBands:
         """
         num_items = len(lst)
         mean = sum(lst) / num_items
-        return sqrt(sum([(x - mean)**2 for x in lst]) / (num_items - 1))
+        return sqrt(sum([(x - mean) ** 2 for x in lst]) / (num_items - 1))

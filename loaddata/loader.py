@@ -66,18 +66,18 @@ class Loader:
             self._close_price.append(self._all_data[_current_index][5])
 
             _current_index += 1
-            print 'Len before 5: ', len(self._close_price)
-            self.make_into_five_minutes()
-            print 'Len after 5: {} and it should be around: {}'.format(len(self._close_price),
-                                                                       _used_data_length / len(self._close_price))
 
-        print '{} patterns processed in {} s'.format(len(self._pattern_array), time.time() - _start_time)
+        #self.make_into_different_candles()
+
+        print '{} patterns processed in {} s\n'.format(len(self._pattern_array), time.time() - _start_time)
 
         return (self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price,
                 self._low_price, self._close_price)
 
-    def make_into_five_minutes(self):
+    def make_into_different_candles(self):
+        candle_period = 3
 
+        print 'Len before {}: {}'.format(candle_period, len(self._close_price))
         temp_pattern_array = []
         temp_performance = []
         temp_time = []
@@ -86,17 +86,13 @@ class Loader:
         temp_low_price = []
         temp_close_price = []
 
-        for i in range(5, len(self._close_price), 5):
+        for i in range(candle_period, len(self._close_price), candle_period):
             try:
-                temp_low_price.append(min(self._low_price[i - 5], self._low_price[i - 4],
-                                          self._low_price[i - 3], self._low_price[i - 2],
-                                          self._low_price[i - 1]))
-                temp_high_price.append(max(self._high_price[i - 5], self._high_price[i - 4],
-                                           self._high_price[i - 3], self._high_price[i - 2],
-                                           self._high_price[i - 1]))
+                temp_low_price.append(min(self._low_price[i-candle_period:i-1]))
+                temp_high_price.append(max(self._high_price[i-candle_period:i-1]))
                 temp_close_price.append(self._close_price[i - 1])
-                temp_open_price.append(self._open_price[i - 5])
-                temp_time.append(self._time[i - 5])
+                temp_open_price.append(self._open_price[i - candle_period])
+                temp_time.append(self._time[i - candle_period])
             except IndexError:
                 print 'It is not a multiple of 5, all but the last have been added'
 
@@ -108,7 +104,7 @@ class Loader:
 
         _used_data_length = int(int(
             len(self._close_price) - (2 * (self.constants.get_pattern_len() - 1))) / (
-                                    5 * self.constants.get_interval_size()))
+                                    self.constants.get_interval_size()))
 
         if len(self._close_price) == len(self._high_price) == len(self._low_price) == len(self._open_price) == len(
                 self._time):

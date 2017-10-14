@@ -55,11 +55,19 @@ class TypicalPrice:
 
     def calculate_initial_sd_array(self):
         for i in range(len(self._sma_of_tp)):
-            temp_num = 0
-            for j in range(i, i + self._sma_period, 1):
-                temp_num += abs(i - self._typical_price_array[j])
-            temp_num /= self._sma_period
-            self._standard_deviation_array.append(temp_num)
+            temp_list = self._typical_price_array[i:i + self._sma_period]
+            self._standard_deviation_array.append(self.calculate_standard_deviation(temp_list))
+
+    @staticmethod
+    def calculate_standard_deviation(lst):
+        """
+        This calculates the standard deviation of a list of numbers
+        :param lst: the list of numbers
+        :return: the standard deviation (sqrt of variance)
+        """
+        num_items = len(lst)
+        mean = sum(lst) / num_items
+        return sqrt(sum([(mean - x) ** 2 for x in lst]) / (num_items - 1))
 
     def add_to_standard_deviation_array(self):
         temp_num = 0
