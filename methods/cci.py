@@ -65,7 +65,7 @@ class CCI:
 
     def get_amount_of_consecutive_times_cci_is_overtraded(self):
         """
-        This returns the amount times the cci has been overtraded. So, if the last few values have been under -100 or
+        This returns the amount times the cci has been over-traded. So, if the last few values have been under -100 or
         above 100, it counts the amount of times, this has happened and returns the value
         :return: The number of consecutive times the cci has been over traded
         """

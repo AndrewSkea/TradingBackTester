@@ -130,6 +130,26 @@ class PatternRecognition:
         # Prints that there are no patterns and inserts the data into the db
         print 'No patterns in: '.format(final_time)
 
+    def log_and_get_percentage_win(self, result_dict, max_iterations):
+
+        print 'Number of iterations of Live patterns: {}\n'.format(max_iterations)
+        table_data = [['Tuple (PC, MACD, CCI, BBAND)', 'Bought', 'Sold', 'Ratio']]
+        for key, value in result_dict.iteritems():
+            if value[0] != 0 and value[1] != 0:
+                ratio = float(value[0])/float(value[1])
+                table_data.append([str(key), str(value[0]), str(value[1]), str("%.2f" % ratio)])
+
+        results_table = AsciiTable(table_data)
+        print results_table.table
+
+        constants_class_state_table = self.constants.get_str_table()
+
+        _file = open("logdata/log.txt", 'a')
+        _file.write(constants_class_state_table)
+        _file.write("\n")
+        _file.write(results_table.table)
+        _file.close()
+
     def start(self):
         """
         This starts the pattern recognition by syncing with the server time and then
@@ -159,28 +179,20 @@ class PatternRecognition:
                 result_dict[result_tuple][1] += 1
             index += 1
 
-        return self.log_and_get_percentage_win(result_dict, max_iterations)
+        self.log_and_get_percentage_win(result_dict, max_iterations)
 
-    def log_and_get_percentage_win(self, result_dict, max_iterations):
+        for key, value in result_dict:
+            if key.count(1) == 3:
+                res = float(value[0])/float(value[0] + value[1])
+                print 'FINAL VALUE: ', res
+                return res
+            elif key.count(0) == 3:
+                res = float(value[1]) / float(value[0] + value[1])
+                print 'FINAL VALUE: ', res
+                return res
+        print 'FINAL VALUE IS NON EXISTENT'
+        return 0
 
-        print 'Number of iterations of Live patterns: {}\n'.format(max_iterations)
-        table_data = [['Tuple (PC, MACD, CCI, BBAND)', 'Bought', 'Sold', 'Percentage Win']]
-        for key, value in result_dict.iteritems():
-            if value[0] != 0 and value[1] != 0:
-                percentage_win = float(100 * value[0]/float(value[0] + value[1]))
-                table_data.append([str(key), str(value[0]), str(value[1]), "%.2f" % percentage_win])
 
-        results_table = AsciiTable(table_data)
-        print results_table.table
 
-        constants_class_state_table = self.constants.get_str_table()
 
-        _file = open("logdata/log.txt", 'a')
-        _file.write(constants_class_state_table)
-        _file.write("\n")
-        _file.write(results_table.table)
-        _file.close()
-
-    # This is put in to avoid errors but I don't know why it is needed so leave it in
-    if __name__ == '__main__':
-        print 'this has been called by the __main__ thing which is bad, this is needed for go knows what reason'

@@ -319,6 +319,22 @@ class Constants:
         """
         return self._cci_limit
 
+    def get_genetic_algorithm_list_state(self):
+        return [
+            self.get_pattern_len(),
+            self.get_num_pattern_req(),
+            self.get_required_difference(),
+            self.get_interval_size(),
+            self.get_ema_a_period(),
+            self.get_ema_b_period(),
+            self.get_signal_period(),
+            self.get_cci_period(),
+            self.get_cci_constant(),
+            self.get_typical_price_sma_period(),
+            self.get_bollinger_band_sma_period(),
+            self.get_cci_limit()
+        ]
+
     def get_csv_str(self):
         """
         This return the csv format for the state on the constants class it is in right now

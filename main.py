@@ -7,6 +7,7 @@ from methods import macd
 from methods import cci
 from methods import bollingerbands
 import pstats
+from multiprocessing import Pool
 
 
 class Main(object):
@@ -96,7 +97,6 @@ class Main(object):
                                                              bband_class)
         # Starts the recognition on the pattern and the live data from the api in the class
         return _recognition.start()
-
 
 constants = constants.Constants()
 main_class = Main(constants)
