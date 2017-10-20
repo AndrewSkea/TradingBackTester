@@ -8,12 +8,13 @@ import patternrecognition
 from methods import macd
 from methods import cci
 from methods import bollingerbands
-from multiprocessing import Pool
+import multiprocessing
 import dill
 
-class GeneticAlgorithm:
 
+class GeneticAlgorithm:
     def __init__(self):
+        print multiprocessing.cpu_count()
         # This is the array of agents in the population (starting with a population of around 20)
         self._agent_array = []
         # This is the target result for the genetic algorithm to try and work towards
@@ -25,7 +26,7 @@ class GeneticAlgorithm:
         # This is the best score tuple with the agent and its score
         self._best_score_agent = (None, 0)
         # This is the process pool
-        self._pool = Pool(processes=4)
+        self._pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
     def create_agents(self):
         for i in range(self._num_agents):
@@ -50,19 +51,30 @@ class GeneticAlgorithm:
         agent1.reset_constants_class(final_list_1)
         agent2.reset_constants_class(final_list_2)
 
+        self.mutate(agent1)
+        self.mutate(agent2)
+
         return agent1, agent2
 
-    def mutate(self):
-        pass
+    def mutate(self, agent):
+        if randint(0, 100) <= 5:
+            agent.mutate_constants_class()
 
     def start(self):
+        result_array = []
+        final_results_array = []
         self.create_agents()
         index = 0
         while self._best_score_agent[1] < self._target_result or index < 10:
-            result_array = self._pool.map(self.start_agent, zip([self]*len(self._agent_array), self._agent_array))
-            final_results_array = []
-            for i in range(len(result_array)):
-                final_results_array.append(self._agent_array[i], result_array[i])
+            for i in range(len(self._agent_array)):
+                result_array.append(self._pool.apply_async(self.start_agent, (self._agent_array[i])))
+            self._pool.close()
+            self._pool.join()
+            
+            temp_index = 0
+            for res in result_array:
+                final_results_array.append(self._agent_array[temp_index], res.get())
+                temp_index += 1
 
             # This sorts the group in ascending order with percentage win
             sorted(final_results_array, key=lambda x: x[1])
@@ -163,6 +175,39 @@ class GeneticMain(object):
         self.constants.set_bollinger_band_sma_period(lst[10])
         self.constants.set_cci_limit(lst[11])
 
+    def mutate_constants_class(self):
+        """
+        Creates an instance of a constants class with random variables assigned
+        :return: return the instance
+        """
+        num = randint(0, 12)
+        if num == 0:
+            self.constants.set_pattern_len(randint(20, 50))
+        elif num == 1:
+            self.constants.set_num_pattern_req(randint(2000, 10000))
+        elif num == 2:
+            self.constants.set_required_difference(uniform(0.001, 0.0001))
+        elif num == 3:
+            self.constants.set_interval_size(randint(1, 20))
+        elif num == 4:
+            self.constants.set_ema_a_period(randint(10, 100))
+        elif num == 5:
+            i = self.constants.get_ema_a_period()
+            self.constants.set_ema_b_period(randint(i, i + 100))
+        elif num == 6:
+            i = self.constants.get_ema_a_period()
+            self.constants.set_signal_period(randint(5, i))
+        elif num == 7:
+            self.constants.set_cci_period(randint(10, 50))
+        elif num == 8:
+            self.constants.set_cci_constant(0.015)
+        elif num == 9:
+            self.constants.set_typical_price_ema_period(randint(10, 100))
+        elif num == 10:
+            self.constants.set_bollinger_band_sma_period(randint(10, 100))
+        elif num == 11:
+            self.constants.set_cci_limit(randint(100, 300))
+
     def start(self):
         """
         The function starts off all the different branches of the program: db set up, loading data, recognition
@@ -171,11 +216,13 @@ class GeneticMain(object):
         # Starts db instance
         _past_data = self.start_db()
         # Starts the loading of data from the db and passes it into the recognition class
-        pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price = self.start_loading_data(all_data_array=_past_data[0])
+        pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price = self.start_loading_data(
+            all_data_array=_past_data[0])
         # this is the tuple of the arrays of the patterns we will consider 'live' patterns
         _patterns_array_tuple = self.start_loading_data(all_data_array=_past_data[1])
         # Starts the recognition part of the program
-        return self.start_pattern_recognition(pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price, _patterns_array_tuple)
+        return self.start_pattern_recognition(pattern_array, performance_array, time_ar, open_price, high_price,
+                                              low_price, close_price, _patterns_array_tuple)
 
     def start_db(self):
         """
@@ -205,7 +252,8 @@ class GeneticMain(object):
         # Return the tuple of the 4 arrays
         return _loader.pattern_storage()
 
-    def start_pattern_recognition(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price, _patterns_array_tuple):
+    def start_pattern_recognition(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price,
+                                  close_price, _patterns_array_tuple):
         """
         Starts the recognition with the tuple of data and performance arrays
         :param _patterns_array_tuple:
@@ -241,6 +289,7 @@ class GeneticMain(object):
 
 def start_the_genetic_algorithm():
     return GeneticAlgorithm().start()
+
 
 # This is put in to avoid errors but I don't know why it is needed so leave it in
 if __name__ == '__main__':
