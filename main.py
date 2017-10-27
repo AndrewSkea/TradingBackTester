@@ -1,8 +1,8 @@
 import cProfile
 import databases
 import loaddata
-import constants
-import patternrecognition
+from constants import constants
+from patternrecognition import recognition
 from methods import macd
 from methods import cci
 from methods import bollingerbands
@@ -85,7 +85,7 @@ class Main(object):
         bband_class.calculate_initial_arrays()
 
         # Creates recognition class instance
-        _recognition = patternrecognition.PatternRecognition(pattern_array,
+        _recognition = recognition.PatternRecognition(pattern_array,
                                                              performance_array,
                                                              time_ar, open_price,
                                                              high_price, low_price,

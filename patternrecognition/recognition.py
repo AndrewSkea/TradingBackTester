@@ -1,5 +1,5 @@
 import time
-import enums
+from enums import enums
 from methods.percentage_change import PercentageChange
 from databases import LogHandler
 from terminaltables import AsciiTable
@@ -128,19 +128,17 @@ class PatternRecognition:
         :return: null
         """
         # Prints that there are no patterns and inserts the data into the db
-        print 'No patterns in: '.format(final_time)
+        print ('No patterns in: '.format(final_time))
 
     def log_and_get_percentage_win(self, result_dict, max_iterations):
-
-        print 'Number of iterations of Live patterns: {}\n'.format(max_iterations)
         table_data = [['Tuple (PC, MACD, CCI, BBAND)', 'Bought', 'Sold', 'Ratio']]
-        for key, value in result_dict.iteritems():
+        for key, value in result_dict.items():
             if value[0] != 0 and value[1] != 0:
                 ratio = float(value[0])/float(value[1])
                 table_data.append([str(key), str(value[0]), str(value[1]), str("%.2f" % ratio)])
 
         results_table = AsciiTable(table_data)
-        print results_table.table
+        #print(results_table.table)
 
         constants_class_state_table = self.constants.get_str_table()
 
@@ -181,17 +179,44 @@ class PatternRecognition:
 
         self.log_and_get_percentage_win(result_dict, max_iterations)
 
-        for key, value in result_dict:
+        temp_res_array = []
+        for key, value in result_dict.items():
             if key.count(1) == 3:
-                res = float(value[0])/float(value[0] + value[1])
-                print 'FINAL VALUE: ', res
-                return res
+                try:
+                    if value[0] + value[1] > 100:
+                        temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
+                except ZeroDivisionError:
+                    pass
+            elif key.count(1) == 2:
+                try:
+                    if value[0] + value[1] > 100:
+                        temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
+                except ZeroDivisionError:
+                    pass
             elif key.count(0) == 3:
-                res = float(value[1]) / float(value[0] + value[1])
-                print 'FINAL VALUE: ', res
-                return res
-        print 'FINAL VALUE IS NON EXISTENT'
-        return 0
+                try:
+                    if value[0] + value[1] > 100:
+                        temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
+                except ZeroDivisionError:
+                    pass
+            elif key.count(0) == 2:
+                try:
+                    if value[0] + value[1] > 100:
+                        temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
+                except ZeroDivisionError:
+                    pass
+        try:
+            temp_res_array.remove(0)
+        except:
+            pass
+        try:
+            max_res = float(sum(temp_res_array)) / float(len(temp_res_array))
+            print('Max results is: ', max_res, 'with: ', temp_res_array)
+            return max_res
+        except:
+            return 0
+
+
 
 
 

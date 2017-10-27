@@ -10,31 +10,31 @@ class Constants:
         """
         ### THESE WILL CHANGE DURING THE PROCESS OF A GENETIC ALGORITHM TO TEST OPTIMAL NUMBERS FOR EACH ###
         # Length of the length of the pattern
-        self._length_of_pattern = 30
+        self._length_of_pattern = 35
         # Number of pattern required for a trade to happen
-        self._num_pattern_req = 5000
+        self._num_pattern_req = 8106
         # Required difference of the predicted outcome to the last point in the array. Greater the better
-        self._required_difference = 0.0001
+        self._required_difference = 0.0003465084639911715
         # The amount of patterns to skip every iteration to provide more variety
-        self._interval_size = 1
+        self._interval_size = 8
         # Number of the live patterns we are using
         self._cut_off = 100
         # The period for ema 1 for the macd
-        self._ema_a_period = 25
+        self._ema_a_period = 55
         # The period for ema 2 for the macd
-        self._ema_b_period = 60
+        self._ema_b_period = 97
         # The signal period done on the macd
-        self._signal_period = 15
+        self._signal_period = 75
         # This is the CCI period
-        self._cci_period = 50
+        self._cci_period = 46
         # This is the CCI constant
         self._cci_constant = 0.015
         # This is the CCI limit
-        self._cci_limit = 200
+        self._cci_limit = 222
         # This is the typical price ema period
-        self._typical_price_sma_period = 50
+        self._typical_price_sma_period = 81
         # This is the sma period for the bollinger band
-        self._bollinger_band_sma_period = 20
+        self._bollinger_band_sma_period = 45
 
         ### THESE DON'T CHANGE DURING THE GENETIC ALGORITHM AS THEY ARE STATIC CONSTANTS, ONLY GETTERS ###
         # Number of the live patterns we are using (It will load always around 100 less than this number)

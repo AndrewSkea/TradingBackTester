@@ -1,4 +1,4 @@
-import enums
+from enums import enums
 from databases import DBHandler
 
 
