@@ -73,7 +73,7 @@ class Loader:
     def make_into_different_candles(self):
         candle_period = 5
 
-        print 'Len before {}: {}'.format(candle_period, len(self._close_price))
+        print ('Len before {}: {}'.format(candle_period, len(self._close_price)))
         temp_pattern_array = []
         temp_performance = []
         temp_time = []
@@ -90,7 +90,7 @@ class Loader:
                 temp_open_price.append(round(self._open_price[i - candle_period], 10))
                 temp_time.append(self._time[i - candle_period])
             except IndexError:
-                print 'It is not a multiple of 5, all but the last have been added'
+                print ('It is not a multiple of 5, all but the last have been added')
 
         self._close_price = temp_close_price
         self._high_price = temp_high_price
@@ -104,9 +104,9 @@ class Loader:
 
         if len(self._close_price) == len(self._high_price) == len(self._low_price) == len(self._open_price) == len(
                 self._time):
-            print 'ALL DATA ARRAYS ARE EQUAL IN LENGTH WITH LENGTH: ', len(self._close_price)
+            print ('ALL DATA ARRAYS ARE EQUAL IN LENGTH WITH LENGTH: ', len(self._close_price))
         else:
-            print 'DATA ARRAYS ARE NOT THE SAME LENGTH'
+            print ('DATA ARRAYS ARE NOT THE SAME LENGTH')
 
         _current_index = self.constants.get_pattern_len()
 

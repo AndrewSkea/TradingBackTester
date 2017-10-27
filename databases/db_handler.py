@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 from abc import abstractmethod
-import enums
+from enums import enums
 
 
 class DBHandler(object):

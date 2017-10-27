@@ -40,7 +40,7 @@ class CCI:
                 self._cci_array.append((self._tp_array[i + self._cci_period] - self._tp_sma_array[i]) /
                                        (self._cci_constant * self._md_array[i]))
             except IndexError:
-                print 'Index Error at index: ', i
+                print('Index Error at index: ', i)
 
     def add_to_cci_array(self, close, high, low):
         tp, sma, dev = self._tp_class.add_last_point(close, high, low)

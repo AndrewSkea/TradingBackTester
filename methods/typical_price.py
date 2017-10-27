@@ -66,6 +66,8 @@ class TypicalPrice:
         for j in lst:
             temp_num += abs(sma_point - j)
         temp_num /= len(lst)
+        if temp_num == 0:
+            temp_num = 0.0000000001
         return temp_num
 
     def add_to_mean_deviation_array(self):

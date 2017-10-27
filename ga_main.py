@@ -1,55 +1,54 @@
-from constants import Constants
-from random import randint, uniform
+from constants.constants import Constants
+from random import randint, uniform, randrange
 import cProfile
 import databases
 import loaddata
-import constants
-import patternrecognition
+from patternrecognition import recognition
 from methods import macd
 from methods import cci
 from methods import bollingerbands
 import multiprocessing
-import dill
 
 
 class GeneticAlgorithm:
     def __init__(self):
-        print multiprocessing.cpu_count()
         # This is the array of agents in the population (starting with a population of around 20)
         self._agent_array = []
         # This is the target result for the genetic algorithm to try and work towards
         self._target_result = 0.80
         # Number of agents
-        self._num_agents = 20
+        self._num_agents = 30
         # This is the top percentage you take to the next round
-        self._top_percentage = int(0.6 * self._num_agents)
+        self._top_percentage = int(0.5 * self._num_agents)
         # This is the best score tuple with the agent and its score
         self._best_score_agent = (None, 0)
         # This is the process pool
-        self._pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+        self._pool = multiprocessing.Pool(processes=multiprocessing.cpu_count()-1)
 
     def create_agents(self):
         for i in range(self._num_agents):
             self._agent_array.append(GeneticMain(self.create_random_constants_class()))
 
     def crossover(self, agent1, agent2):
+
         crossover_index = randint(1, 11)
         constants_state_1 = agent1.get_constants_class_instance().get_genetic_algorithm_list_state()
         constants_state_2 = agent2.get_constants_class_instance().get_genetic_algorithm_list_state()
-
+        len_1 = len(constants_state_1)
+        len_2 = len(constants_state_2)
         start_crossover_list_1 = constants_state_1[:crossover_index]
         end_constants_state_1 = constants_state_1[crossover_index:]
 
         start_crossover_list_2 = constants_state_2[:crossover_index]
         end_constants_state_2 = constants_state_2[crossover_index:]
 
-        final_list_1 = start_crossover_list_2
-        final_list_1.append(end_constants_state_1)
-        final_list_2 = start_crossover_list_1
-        final_list_2.append(end_constants_state_2)
+        final_list_1 = start_crossover_list_2 + end_constants_state_1
+        final_list_2 = start_crossover_list_1 + end_constants_state_2
 
         agent1.reset_constants_class(final_list_1)
         agent2.reset_constants_class(final_list_2)
+
+        assert(len_1 == len(final_list_1) and len_2 == len(final_list_2))
 
         self.mutate(agent1)
         self.mutate(agent2)
@@ -60,52 +59,57 @@ class GeneticAlgorithm:
         if randint(0, 100) <= 5:
             agent.mutate_constants_class()
 
+    def __getstate__(self):
+        self_dict = self.__dict__.copy()
+        del self_dict['_pool']
+        return self_dict
+
+    def __setstate__(self, state):
+        """ This is called while unpickling. """
+        self.__dict__.update(state)
+
     def start(self):
-        result_array = []
-        final_results_array = []
+
         self.create_agents()
         index = 0
-        while self._best_score_agent[1] < self._target_result or index < 10:
-            for i in range(len(self._agent_array)):
-                result_array.append(self._pool.apply_async(self.start_agent, (self._agent_array[i])))
-            self._pool.close()
-            self._pool.join()
-            
+        while self._best_score_agent[1] > self._target_result or index < 20:
+            final_results_array = []
+            result_array = self._pool.map(self.start_agent, self._agent_array)
+
             temp_index = 0
             for res in result_array:
-                final_results_array.append(self._agent_array[temp_index], res.get())
+                final_results_array.append((self._agent_array[temp_index], res))
                 temp_index += 1
-
             # This sorts the group in ascending order with percentage win
             sorted(final_results_array, key=lambda x: x[1])
-            # This gets the top percentage of the group and discards the rest of them
-            final_results_array = final_results_array[self._top_percentage:]
+            print(index, '. Length of the final array list: ', len(final_results_array))
+            index += 1
+            final_results_array = final_results_array[self._top_percentage:] + final_results_array[self._top_percentage:]
             self._best_score_agent = final_results_array[-1]
 
             self._agent_array = []
 
             while len(final_results_array) != 0:
                 if len(final_results_array) >= 2:
-                    first_chosen_index = randint(0, len(final_results_array))
-                    first_chosen = final_results_array[first_chosen_index][0]
+                    first_chosen_index = randrange(0, len(final_results_array))
+                    first_chosen_t = final_results_array[first_chosen_index]
+                    first_chosen = first_chosen_t[0]
                     del final_results_array[first_chosen_index]
-                    second_chosen_index = randint(0, len(final_results_array))
-                    second_chosen = final_results_array[first_chosen_index][0]
+                    second_chosen_index = randrange(0, len(final_results_array))
+                    second_chosen_t = final_results_array[second_chosen_index]
+                    second_chosen = second_chosen_t[0]
                     del final_results_array[second_chosen_index]
 
                     child1, child2 = self.crossover(first_chosen, second_chosen)
-
                     self._agent_array.append(child1)
                     self._agent_array.append(child2)
                 else:
                     del final_results_array[0]
 
-            index += 1
-
         best_agent = self._best_score_agent[0]
         constants_class = best_agent.get_constants_class_instance()
         constants_state_table = constants_class.get_str_table()
-        print constants_state_table
+        print(constants_state_table)
 
         _file = open("logdata/constants_log.txt", 'a')
         _file.write(constants_state_table)
@@ -113,7 +117,7 @@ class GeneticAlgorithm:
         _file.close()
 
     def start_agent(self, agent_class):
-        agent_class.start()
+        return agent_class.start()
 
     def create_random_constants_class(self):
         """
@@ -273,7 +277,7 @@ class GeneticMain(object):
         bband_class.calculate_initial_arrays()
 
         # Creates recognition class instance
-        _recognition = patternrecognition.PatternRecognition(pattern_array,
+        _recognition = recognition.PatternRecognition(pattern_array,
                                                              performance_array,
                                                              time_ar, open_price,
                                                              high_price, low_price,

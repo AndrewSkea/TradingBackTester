@@ -2,7 +2,7 @@ import datetime
 import time
 
 from databases import DBHandler
-import enums
+from enums import enums
 
 
 class LogHandler(DBHandler):
@@ -28,7 +28,7 @@ class LogHandler(DBHandler):
         this sets up the insert string that will be executed
         :return: null
         """
-        print 'Inserting into log started'
+        print ('Inserting into log started')
         _date_time = str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
         _insert_string = 'INSERT INTO log VALUES ((SELECT MAX(id)+1 FROM log),{},{},{},{},{},{},{});' \
             .format("'" + _date_time + "'", num_patterns, avg_predicted_outcome, time_for_recog, num_bets,

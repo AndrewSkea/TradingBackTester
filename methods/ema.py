@@ -1,4 +1,5 @@
 from enums import enums
+import functools
 
 
 class EMA:
@@ -14,7 +15,7 @@ class EMA:
         :return:
         """
         # Gets the first average of the first [period] data points
-        self._ema_values_array.append(reduce(lambda x, y: x + y, self._all_data[:self._period]) / self._period)
+        self._ema_values_array.append(functools.reduce(lambda x, y: x + y, self._all_data[:self._period]) / self._period)
         for i in range(self._period, len(self._all_data), 1):
             current_ema = (self._all_data[i] * self._multiplier +
                            self._ema_values_array[-1] * (1 - self._multiplier))
