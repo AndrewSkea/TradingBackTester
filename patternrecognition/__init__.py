@@ -1,1 +1,1 @@
-from recognition import PatternRecognition
+from patternrecognition import *

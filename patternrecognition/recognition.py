@@ -1,36 +1,45 @@
 import time
-import enums
-from iqoption import iqapi
+from enums import enums
 from methods.percentage_change import PercentageChange
-from methods.macd import MACD
 from databases import LogHandler
+from terminaltables import AsciiTable
 
 
 class PatternRecognition:
-    def __init__(self, _data_array_tuple, _patterns_array_tuple, _indicator_data_array_tuple, constants_class,
-                 macd_class, cci_class):
+    def __init__(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price, _patterns_array_tuple, constants_class,
+                 macd_class, cci_class, bband_class):
         """
-        This initialises all the data that is needed in this class
-        :param array_data_tuple: 
+        :param pattern_array:
+        :param performance_array:
+        :param time_ar:
+        :param open_price:
+        :param high_price:
+        :param low_price:
+        :param close_price:
+        :param _patterns_array_tuple:
+        :param constants_class:
+        :param macd_class:
+        :param cci_class:
+        :param bband_class:
         """
         # Instance for the constants class
         self.constants = constants_class
-        # Tuple for all the past data
-        array_data_tuple = _data_array_tuple
         # Tuple for the live patterns
         self.pattern_data_tuples = _patterns_array_tuple
         # This is the array that has the historic data patterns that end up buying
-        self._pattern_array = array_data_tuple[0]
+        self._pattern_array = pattern_array
         # This is the buy performance array which is the pattern's outcome (same index as pattern)
-        self._performance_array = array_data_tuple[1]
+        self._performance_array = performance_array
         # This is the array that has the historic data patterns that end up selling
-        self._time = array_data_tuple[2]
+        self._time = time_ar
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._high = array_data_tuple[3]
+        self._high = high_price
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._low = array_data_tuple[4]
+        self._low = low_price
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._close = array_data_tuple[5]
+        self._close = close_price
+        # This is the sell performance array which is the pattern's outcome (same index as pattern)
+        self._open = open_price
         # Instance of Log handler
         self._log_handler = LogHandler()
         # Number of bets
@@ -41,6 +50,8 @@ class PatternRecognition:
         self._pc = PercentageChange(self.constants, self._pattern_array, self._performance_array)
         # CCI Class
         self._cci = cci_class
+        # BBand class Class
+        self._bband = bband_class
 
     def recognition(self, pattern, close_value, low_value, high_value):
         """
@@ -52,15 +63,23 @@ class PatternRecognition:
         :return: null
         """
         result_array = []
-        result_array.append(self._pc.get_result_of_pc(pattern=pattern))
+        # This is getting the result of the percentage change indicator
+        # result_array.append(self._pc.get_result_of_pc(pattern=pattern))
+        result_array.append(enums.Option.NO_TRADE)
 
+        # THis is getting the result for the MACD indicator
         self._macd.add_data_point(close_value)
         result_array.append(self._macd.get_result())
 
+        # This is getting the result for the CCI indicator
         self._cci.add_to_cci_array(close_value, high_value, low_value)
         cci_result, cci_strength = self._cci.get_result()
         result_array.append(cci_result)
         cci_strength *= 100
+
+        # This is getting the result for the Bollinger Bands
+        self._bband.add_to_arrays(close_value)
+        result_array.append(self._bband.get_result())
 
         index_of_array = 0
         for i in result_array:
@@ -71,8 +90,6 @@ class PatternRecognition:
             else:
                 result_array[index_of_array] = -1
             index_of_array += 1
-
-        print result_array
 
         return tuple(result_array), cci_strength
 
@@ -111,7 +128,25 @@ class PatternRecognition:
         :return: null
         """
         # Prints that there are no patterns and inserts the data into the db
-        print 'No patterns in: '.format(final_time)
+        print ('No patterns in: '.format(final_time))
+
+    def log_and_get_percentage_win(self, result_dict, max_iterations):
+        table_data = [['Tuple (PC, MACD, CCI, BBAND)', 'Bought', 'Sold', 'Ratio']]
+        for key, value in result_dict.items():
+            if value[0] != 0 and value[1] != 0:
+                ratio = float(value[0])/float(value[1])
+                table_data.append([str(key), str(value[0]), str(value[1]), str("%.2f" % ratio)])
+
+        results_table = AsciiTable(table_data)
+        #print(results_table.table)
+
+        constants_class_state_table = self.constants.get_str_table()
+
+        _file = open("logdata/log.txt", 'a')
+        _file.write(constants_class_state_table)
+        _file.write("\n")
+        _file.write(results_table.table)
+        _file.close()
 
     def start(self):
         """
@@ -124,90 +159,65 @@ class PatternRecognition:
         for i in range(-1, 2, 1):
             for j in range(-1, 2, 1):
                 for k in range(-1, 2, 1):
-                    result_array.append((i, j, k))
+                    for l in range(-1, 2, 1):
+                        result_array.append((i, j, k, l))
 
-        result_dict = {result_array[i]: [0, 0, 0] for i in range(len(result_array))}
+        result_dict = {result_array[i]: [0, 0] for i in range(len(result_array))}
 
         # Number of patterns there are
         max_iterations = len(self.pattern_data_tuples[0])
-        print 'Number of iterations: ', max_iterations
         index = 0
         while index < max_iterations - 1:
             # Run recognition on the current pattern
-            _start_time = time.time()
             result_tuple, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
                                                           self._low[index], self._high[index])
-            _end_time = time.time() - _start_time
             if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
                 result_dict[result_tuple][0] += 1
-                print index, ' - BUY x ', strength_of_option, 'in ', _end_time
             elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
                 result_dict[result_tuple][1] += 1
-                print index, ' - SELL x ', strength_of_option, 'in ', _end_time
-            else:
-                result_dict[result_tuple][2] += 1
-                print index, ' - DRAW x ', strength_of_option, 'in ', _end_time
             index += 1
 
-        return self.log_and_get_percentage_win(result_dict, max_iterations)
+        self.log_and_get_percentage_win(result_dict, max_iterations)
 
-    def log_and_get_percentage_win(self, result_dict, max_iterations):
+        temp_res_array = []
+        for key, value in result_dict.items():
+            if key.count(1) == 3:
+                try:
+                    if value[0] + value[1] > 100:
+                        temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
+                except ZeroDivisionError:
+                    pass
+            elif key.count(1) == 2:
+                try:
+                    if value[0] + value[1] > 100:
+                        temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
+                except ZeroDivisionError:
+                    pass
+            elif key.count(0) == 3:
+                try:
+                    if value[0] + value[1] > 100:
+                        temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
+                except ZeroDivisionError:
+                    pass
+            elif key.count(0) == 2:
+                try:
+                    if value[0] + value[1] > 100:
+                        temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
+                except ZeroDivisionError:
+                    pass
+        try:
+            temp_res_array.remove(0)
+        except:
+            pass
+        try:
+            max_res = float(sum(temp_res_array)) / float(len(temp_res_array))
+            print('Max results is: ', max_res, 'with: ', temp_res_array)
+            return max_res
+        except:
+            return 0
 
-        # num_wins
-        #
-        # _num_wins = _num_wins_strength_1 + _num_wins_strength_2 + _num_wins_strength_3 + _num_wins_strength_10
-        # _num_loses = _num_loses_strength_1 + _num_loses_strength_2 + _num_loses_strength_3 + _num_loses_strength_10
-        # _num_draws = _num_draws_strength_0
-        # _total_num_iterations = _num_wins + _num_loses + _num_draws + _num_no_trades
-        # _rest_of_iterations = max_iterations - _total_num_iterations
-        #
-        # _percentage_win = float(_num_wins) / float(_num_loses + _num_draws + _num_wins)
-        #
-        # print '\n\n\n\nPercentage win = ', ("%.2f" % round(_percentage_win * 100, 2)), '%\n', \
-        #     '_num_wins_strength_1  = ', _num_wins_strength_1, '\n', \
-        #     '_num_wins_strength_2  = ', _num_wins_strength_2, '\n', \
-        #     '_num_wins_strength_3  = ', _num_wins_strength_3, '\n', \
-        #     '_num_wins_strength_10 = ', _num_wins_strength_10, '\n', \
-        #     '_num_loses_strength_1 = ', _num_loses_strength_1, '\n', \
-        #     '_num_loses_strength_2 = ', _num_loses_strength_2, '\n', \
-        #     '_num_loses_strength_3 = ', _num_loses_strength_3, '\n', \
-        #     '_num_loses_strength_10 = ', _num_loses_strength_10, '\n', \
-        #     '_num_draws_strength_0 = ', _num_draws_strength_0, '\n', \
-        #     '_num_no_trades = ', _num_no_trades, '\n', \
-        #     '_total_num_iterations = ', _total_num_iterations
-        #
-        # result_csv_string = ',{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(
-        #     _percentage_win,
-        #     _num_wins_strength_1,
-        #     _num_wins_strength_2,
-        #     _num_wins_strength_3,
-        #     _num_wins_strength_10,
-        #     _num_loses_strength_1,
-        #     _num_loses_strength_2,
-        #     _num_loses_strength_3,
-        #     _num_loses_strength_10,
-        #     _num_draws_strength_0,
-        #     _num_no_trades,
-        #     _total_num_iterations,
-        #     _rest_of_iterations)
-        #
-        # log_string = self.constants.get_csv_str() + result_csv_string
-        #
-        # f = open("logdata/log.csv", 'a')
-        # f.write(log_string)
-        # f.close()
-        # return _percentage_win
-        self.constants.get_num_live_patterns()
-        log_string = '\n\n\n\n' + str(self.constants.get_num_live_patterns()) + "\ntuple,bought,sold,drawed\n"
-        for key, value in result_dict.iteritems():
-            log_string += "{},{},{},{}\n".format(key, value[0], value[1], value[2])
 
-        print log_string
-        f = open("logdata/log.csv", 'a')
-        f.write(log_string)
-        f.close()
-        return 0
 
-    # This is put in to avoid errors but I don't know why it is needed so leave it in
-    if __name__ == '__main__':
-        print 'this has been called by the __main__ thing which is bad, this is needed for go knows what reason'
+
+
+

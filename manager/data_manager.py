@@ -24,10 +24,8 @@ class DataManager:
         # This is the array that has the historic data patterns that end up selling
         self._time = array_data_tuple[2]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._high = array_data_tuple[3]
+        self._high = array_data_tuple[4]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._low = array_data_tuple[4]
+        self._low = array_data_tuple[5]
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._close = array_data_tuple[5]
-
-    def 
+        self._close = array_data_tuple[6]

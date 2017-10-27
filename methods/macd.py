@@ -1,6 +1,6 @@
 from enums.enums import Position, Direction, Option
 from methods import ema
-import time
+import functools
 
 
 class MACD:
@@ -32,7 +32,7 @@ class MACD:
         # Making the two arrays the same length in order to stop errors
         ema_a_array = ema_a_array[-len(ema_b_array):]
         # Make sure they are the same length here to avoid any errors
-        assert len(ema_b_array) == len(ema_a_array)
+#        assert len(ema_b_array) == len(ema_a_array)
         # Go through the list and append the difference between the two ema arrays by index
         for i in range(len(ema_a_array)):
             self._macd_array.append(float(float(ema_b_array[i]) - float(ema_a_array[i])))
@@ -41,7 +41,7 @@ class MACD:
         # Get the constant for the period of the signal line
         period = self.constants.get_signal_period()
         # Append the average of the first [period] data points to initialise the array
-        self._signal_array.append(reduce(lambda x, y: x + y, self._macd_array[:period]) / period)
+        self._signal_array.append(functools.reduce(lambda x, y: x + y, self._macd_array[:period]) / period)
         for i in range(period, len(self._macd_array[period:]), 1):
             current_signal = (self._macd_array[i] * self._multiplier + self._signal_array[-1] * (1 - self._multiplier))
             self._signal_array.append(current_signal)
@@ -57,21 +57,24 @@ class MACD:
         self.check_crossover()
 
     def check_crossover(self):
-        if self._macd_array[-1] > self._signal_array[-1]:
-            self._position = Position.ABOVE
-        elif self._macd_array[-1] < self._signal_array[-1]:
-            self._position = Position.BELOW
-        else:
-            self._position = Position.EQUAL
-
-            self._last_position = self._crossover_array[-1]
-        if self._last_position != self._position:
-            if self._last_position == Position.ABOVE:
-                self._crossover_array.append(Direction.DOWN)
+        try:
+            if self._macd_array[-1] > self._signal_array[-1]:
+                self._position = Position.ABOVE
+            elif self._macd_array[-1] < self._signal_array[-1]:
+                self._position = Position.BELOW
             else:
-                self._crossover_array.append(Direction.UP)
-            self._last_position = self._position
-            self._is_new_value = True
+                self._position = Position.EQUAL
+
+                self._last_position = self._crossover_array[-1]
+            if self._last_position != self._position:
+                if self._last_position == Position.ABOVE:
+                    self._crossover_array.append(Direction.DOWN)
+                else:
+                    self._crossover_array.append(Direction.UP)
+                self._last_position = self._position
+                self._is_new_value = True
+        except Exception as e:
+            print('No crossovers so ', e)
 
     def calculate_initial_crossover_array(self):
         _macd_array = self._macd_array[-len(self._signal_array):]
@@ -98,8 +101,6 @@ class MACD:
                     self._crossover_array.append(Direction.UP)
             self._last_position = self._position
             self._is_new_value = True
-
-        print 'len of crossover array', len(self._crossover_array)
 
     def get_result(self):
         """

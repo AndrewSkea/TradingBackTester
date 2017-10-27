@@ -49,6 +49,7 @@ class PercentageChange:
         return _predicted_outcomes_array
 
     def get_result_of_pc(self, pattern):
+
         _predicted_outcomes_array = self.get_predicted_outcomes(pattern)
 
         # Calculates the number of patterns found from the returned array of previous outcomes
