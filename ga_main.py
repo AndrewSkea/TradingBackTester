@@ -7,6 +7,7 @@ from patternrecognition import recognition
 from methods import macd
 from methods import cci
 from methods import bollingerbands
+from methods import stochastic_oscillator
 import multiprocessing
 
 
@@ -68,11 +69,23 @@ class GeneticAlgorithm:
         """ This is called while unpickling. """
         self.__dict__.update(state)
 
-    def start(self):
+    def chose_parents(self, agent_array):
+        choice_array = []
+        final_choice_array = []
+        for i in range(len(agent_array)):
+            for j in range(i):
+                choice_array.append(i)
+        for i in range(len(agent_array)):
+            num = randint(0, len(choice_array)+1)
+            final_choice_array.append(agent_array[num])
+        assert len(agent_array) == len(final_choice_array)
+        return final_choice_array
 
+
+    def start(self):
         self.create_agents()
         index = 0
-        while self._best_score_agent[1] > self._target_result or index < 20:
+        while self._best_score_agent[1] > self._target_result or index < 3:
             final_results_array = []
             result_array = self._pool.map(self.start_agent, self._agent_array)
 
@@ -84,7 +97,7 @@ class GeneticAlgorithm:
             sorted(final_results_array, key=lambda x: x[1])
             print(index, '. Length of the final array list: ', len(final_results_array))
             index += 1
-            final_results_array = final_results_array[self._top_percentage:] + final_results_array[self._top_percentage:]
+            final_results_array = self.chose_parents(final_results_array)
             self._best_score_agent = final_results_array[-1]
 
             self._agent_array = []
@@ -138,6 +151,7 @@ class GeneticAlgorithm:
         constants_class.set_typical_price_ema_period(randint(10, 100))
         constants_class.set_bollinger_band_sma_period(randint(10, 100))
         constants_class.set_cci_limit(randint(100, 300))
+        constants_class.set_stochastic_oscillator_period(randint(5, 50))
         return constants_class
 
 
@@ -178,13 +192,14 @@ class GeneticMain(object):
         self.constants.set_typical_price_ema_period(lst[9])
         self.constants.set_bollinger_band_sma_period(lst[10])
         self.constants.set_cci_limit(lst[11])
+        self.constants.set_stochastic_oscillator_period(lst[12])
 
     def mutate_constants_class(self):
         """
         Creates an instance of a constants class with random variables assigned
         :return: return the instance
         """
-        num = randint(0, 12)
+        num = randint(0, 13)
         if num == 0:
             self.constants.set_pattern_len(randint(20, 50))
         elif num == 1:
@@ -211,6 +226,8 @@ class GeneticMain(object):
             self.constants.set_bollinger_band_sma_period(randint(10, 100))
         elif num == 11:
             self.constants.set_cci_limit(randint(100, 300))
+        elif num == 12:
+            self.constants.set_stochastic_oscillator_period(randint(5, 50))
 
     def start(self):
         """
@@ -275,6 +292,10 @@ class GeneticMain(object):
         # This is creating the Bollinger Band class instance and calculating the initial arrays
         bband_class = bollingerbands.BollingerBands(close_price, self.constants)
         bband_class.calculate_initial_arrays()
+        # This is creating the Stochastic Oscillator Class
+        stoch_osc = stochastic_oscillator.StochasticOscillator(high_price=high_price, low_price=low_price,
+                                                               close_price=close_price, constant_class=self.constants)
+        stoch_osc.calculate_stoch_osc_initial_array()
 
         # Creates recognition class instance
         _recognition = recognition.PatternRecognition(pattern_array,
@@ -286,7 +307,8 @@ class GeneticMain(object):
                                                              self.constants,
                                                              macd_class,
                                                              cci_class,
-                                                             bband_class)
+                                                             bband_class,
+                                                             stoch_osc)
         # Starts the recognition on the pattern and the live data from the api in the class
         return _recognition.start()
 

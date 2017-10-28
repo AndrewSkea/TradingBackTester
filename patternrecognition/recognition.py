@@ -110,11 +110,23 @@ class PatternRecognition:
         print ('No patterns in: '.format(final_time))
 
     def log_and_get_percentage_win(self, result_dict):
-        table_data = [['(PC, MACD, CCI, BBAND, STOCH_OSC)', 'Bought', 'Sold', 'Ratio']]
+        table_data = [['PC', 'MACD', 'CCI', 'BBAND', 'STOCH_OSC', 'Num Buys', 'Num Sells', 'Ratio']]
         for key, value in result_dict.items():
-            if value[0] != 0 and value[1] != 0 and key.count(-1) < 4:
-                ratio = float(value[0])/float(value[1])
-                table_data.append([str(key), str(value[0]), str(value[1]), str("%.2f" % ratio)])
+            if (value[0] != 0 or value[1] != 0) and key.count(-1) < 4:
+                key_final = []
+                for k in key:
+                    if k == 0:
+                        key_final.append('S')
+                    elif k == 1:
+                        key_final.append('B')
+                    else:
+                        key_final.append(' ')
+                try:
+                    ratio = float(value[0])/float(value[1])
+                except ZeroDivisionError:
+                    ratio = 0.0
+                table_data.append([key_final[0], key_final[1], key_final[2], key_final[3], key_final[4],
+                                   value[0], value[1], "%.2f" % ratio])
 
         results_table = AsciiTable(table_data)
         print(results_table.table)
