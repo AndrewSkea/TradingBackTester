@@ -18,7 +18,7 @@ class GeneticAlgorithm:
         # This is the target result for the genetic algorithm to try and work towards
         self._target_result = 0.80
         # Number of agents
-        self._num_agents = 30
+        self._num_agents = 12
         # This is the top percentage you take to the next round
         self._top_percentage = int(0.5 * self._num_agents)
         # This is the best score tuple with the agent and its score
@@ -76,11 +76,11 @@ class GeneticAlgorithm:
             for j in range(i):
                 choice_array.append(i)
         for i in range(len(agent_array)):
-            num = randint(0, len(choice_array)+1)
+            num = randint(0, len(choice_array))
+            num = choice_array[num]
             final_choice_array.append(agent_array[num])
         assert len(agent_array) == len(final_choice_array)
         return final_choice_array
-
 
     def start(self):
         self.create_agents()

@@ -112,7 +112,7 @@ class PatternRecognition:
     def log_and_get_percentage_win(self, result_dict):
         table_data = [['PC', 'MACD', 'CCI', 'BBAND', 'STOCH_OSC', 'Num Buys', 'Num Sells', 'Ratio']]
         for key, value in result_dict.items():
-            if (value[0] != 0 or value[1] != 0) and key.count(-1) < 4:
+            if (value[0] != 0 or value[1] != 0) and key.count(-1) < 5:
                 key_final = []
                 for k in key:
                     if k == 0:
@@ -122,9 +122,13 @@ class PatternRecognition:
                     else:
                         key_final.append(' ')
                 try:
-                    ratio = float(value[0])/float(value[1])
+                    ratio = float(value[0]) / float(value[1])
                 except ZeroDivisionError:
-                    ratio = 0.0
+                    if value[0] == 0:
+                        ratio = value[1]
+                    else:
+                        ratio = value[0]
+
                 table_data.append([key_final[0], key_final[1], key_final[2], key_final[3], key_final[4],
                                    value[0], value[1], "%.2f" % ratio])
 
@@ -135,7 +139,7 @@ class PatternRecognition:
 
         _file = open("logdata/log.txt", 'a')
         _file.write(constants_class_state_table)
-        _file.write("\n")
+        _file.write("\n\n\n")
         _file.write(results_table.table)
         _file.close()
 
