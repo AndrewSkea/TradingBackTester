@@ -6,8 +6,8 @@ from terminaltables import AsciiTable
 
 
 class PatternRecognition:
-    def __init__(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price, _patterns_array_tuple, constants_class,
-                 macd_class, cci_class, bband_class):
+    def __init__(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price,
+                 _patterns_array_tuple, constants_class, macd_class, cci_class, bband_class, stoch_osc):
         """
         :param pattern_array:
         :param performance_array:
@@ -52,6 +52,8 @@ class PatternRecognition:
         self._cci = cci_class
         # BBand class Class
         self._bband = bband_class
+        # THis is the Stochastic Oscillator classs
+        self._stoch_osc = stoch_osc
 
     def recognition(self, pattern, close_value, low_value, high_value):
         """
@@ -81,6 +83,10 @@ class PatternRecognition:
         self._bband.add_to_arrays(close_value)
         result_array.append(self._bband.get_result())
 
+        # This is getting the result of the stochastic osc class
+        self._stoch_osc.add_to_stoch(high_value, low_value, close_value)
+        result_array.append(self._stoch_osc.get_result())
+
         index_of_array = 0
         for i in result_array:
             if i == enums.Option.BUY:
@@ -93,33 +99,6 @@ class PatternRecognition:
 
         return tuple(result_array), cci_strength
 
-        #  if r == (0, 0, 0):
-        #     return enums.Option.SELL, cci_strength + 20
-        # elif r ==
-        # elif r == (1, 1, 1):
-        #     return enums.Option.BUY, cci_strength + 20
-        #
-        # if r == (0, 0, 0):
-        #     return enums.Option.BUY, cci_strength + 1
-        # elif r == (0, 0, 1):
-        #     return enums.Option.BUY, cci_strength + 2
-        # elif r == (0, 1, 0):
-        #     return enums.Option.BUY, cci_strength + 3
-        # elif r == (0, 1, 1):
-        #     return enums.Option.BUY, cci_strength + 4
-        # elif r == (1, 0, 0):
-        #     return enums.Option.BUY, cci_strength + 5
-        # elif r == (1, 0, 1):
-        #     return enums.Option.BUY, cci_strength + 6
-        # elif r == (1, 1, 0):
-        #     return enums.Option.BUY, cci_strength + 7
-        # elif r == (-1, 1, 1):
-        #     return enums.Option.BUY, cci_strength + 8
-        # elif r == (1, 1, 1):
-        #     return enums.Option.BUY, cci_strength + 9
-        # else:
-        #     return enums.Option.NO_TRADE, 0
-
     def no_patterns(self, final_time):
         """
         This is called when no patterns have been found or the criteria hasn't been  met so a standard input is
@@ -130,15 +109,15 @@ class PatternRecognition:
         # Prints that there are no patterns and inserts the data into the db
         print ('No patterns in: '.format(final_time))
 
-    def log_and_get_percentage_win(self, result_dict, max_iterations):
-        table_data = [['Tuple (PC, MACD, CCI, BBAND)', 'Bought', 'Sold', 'Ratio']]
+    def log_and_get_percentage_win(self, result_dict):
+        table_data = [['(PC, MACD, CCI, BBAND, STOCH_OSC)', 'Bought', 'Sold', 'Ratio']]
         for key, value in result_dict.items():
-            if value[0] != 0 and value[1] != 0:
+            if value[0] != 0 and value[1] != 0 and key.count(-1) < 4:
                 ratio = float(value[0])/float(value[1])
                 table_data.append([str(key), str(value[0]), str(value[1]), str("%.2f" % ratio)])
 
         results_table = AsciiTable(table_data)
-        #print(results_table.table)
+        print(results_table.table)
 
         constants_class_state_table = self.constants.get_str_table()
 
@@ -154,16 +133,7 @@ class PatternRecognition:
         running the recognition every minute from then on in order to trade
         :return:
         """
-        result_array = []
         result_dict = {}
-        for i in range(-1, 2, 1):
-            for j in range(-1, 2, 1):
-                for k in range(-1, 2, 1):
-                    for l in range(-1, 2, 1):
-                        result_array.append((i, j, k, l))
-
-        result_dict = {result_array[i]: [0, 0] for i in range(len(result_array))}
-
         # Number of patterns there are
         max_iterations = len(self.pattern_data_tuples[0])
         index = 0
@@ -172,12 +142,20 @@ class PatternRecognition:
             result_tuple, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
                                                           self._low[index], self._high[index])
             if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
-                result_dict[result_tuple][0] += 1
+                try:
+                    temp = result_dict[result_tuple]
+                    result_dict.update({result_tuple: (temp[0]+1, temp[1])})
+                except KeyError:
+                    result_dict.update({result_tuple: (0, 0)})
             elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
-                result_dict[result_tuple][1] += 1
+                try:
+                    temp = result_dict[result_tuple]
+                    result_dict.update({result_tuple: (temp[0], temp[1]+1)})
+                except KeyError:
+                    result_dict.update({result_tuple: (0, 0)})
             index += 1
 
-        self.log_and_get_percentage_win(result_dict, max_iterations)
+        self.log_and_get_percentage_win(result_dict)
 
         temp_res_array = []
         for key, value in result_dict.items():

@@ -10,31 +10,31 @@ class Constants:
         """
         ### THESE WILL CHANGE DURING THE PROCESS OF A GENETIC ALGORITHM TO TEST OPTIMAL NUMBERS FOR EACH ###
         # Length of the length of the pattern
-        self._length_of_pattern = 35
+        self._length_of_pattern = 30
         # Number of pattern required for a trade to happen
-        self._num_pattern_req = 8106
+        self._num_pattern_req = 5000
         # Required difference of the predicted outcome to the last point in the array. Greater the better
-        self._required_difference = 0.0003465084639911715
+        self._required_difference = 0.0001
         # The amount of patterns to skip every iteration to provide more variety
-        self._interval_size = 8
-        # Number of the live patterns we are using
-        self._cut_off = 100
+        self._interval_size = 10
         # The period for ema 1 for the macd
-        self._ema_a_period = 55
+        self._ema_a_period = 40
         # The period for ema 2 for the macd
-        self._ema_b_period = 97
+        self._ema_b_period = 70
         # The signal period done on the macd
-        self._signal_period = 75
+        self._signal_period = 21
         # This is the CCI period
-        self._cci_period = 46
+        self._cci_period = 53
         # This is the CCI constant
         self._cci_constant = 0.015
         # This is the CCI limit
-        self._cci_limit = 222
+        self._cci_limit = 250
         # This is the typical price ema period
-        self._typical_price_sma_period = 81
+        self._typical_price_sma_period = 34
         # This is the sma period for the bollinger band
-        self._bollinger_band_sma_period = 45
+        self._bollinger_band_sma_period = 20
+        # Stochastic Oscillator Period
+        self._stochastic_oscillator_period = 14
 
         ### THESE DON'T CHANGE DURING THE GENETIC ALGORITHM AS THEY ARE STATIC CONSTANTS, ONLY GETTERS ###
         # Number of the live patterns we are using (It will load always around 100 less than this number)
@@ -206,6 +206,13 @@ class Constants:
         """
         self._cci_limit = num
 
+    def set_stochastic_oscillator_period(self, num):
+        """
+        This is the setter for the stochstic oscillator perid
+        :return:
+        """
+        self._stochastic_oscillator_period = num
+
     def get_pattern_len(self):
         """
         The getter for the length of pattern
@@ -317,7 +324,14 @@ class Constants:
         The getter for the cci limit
         :return:
         """
-        return self._cci_limit
+        return self._cci_limit#
+
+    def get_stochastic_oscillator_period(self):
+        """
+        Getter for the stochastic oscillator
+        :return: The num
+        """
+        return self._stochastic_oscillator_period
 
     def get_genetic_algorithm_list_state(self):
         return [
@@ -332,7 +346,8 @@ class Constants:
             self.get_cci_constant(),
             self.get_typical_price_sma_period(),
             self.get_bollinger_band_sma_period(),
-            self.get_cci_limit()
+            self.get_cci_limit(),
+            self.get_stochastic_oscillator_period()
         ]
 
     def get_csv_str(self):
@@ -340,7 +355,7 @@ class Constants:
         This return the csv format for the state on the constants class it is in right now
         :return: The CSV string
         """
-        return '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(
+        return '{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}'.format(
             self.get_pattern_len(),
             self.get_num_pattern_req(),
             self.get_required_difference(),
@@ -356,7 +371,8 @@ class Constants:
             self.get_cci_constant(),
             self.get_typical_price_sma_period(),
             self.get_bollinger_band_sma_period(),
-            self.get_cci_limit())
+            self.get_cci_limit(),
+            self.get_stochastic_oscillator_period())
 
     def get_str_table(self):
         table_data = [["Constant Name", "Value"]]
@@ -374,6 +390,7 @@ class Constants:
         table_data.append(["Typical Price SMA period", self.get_typical_price_sma_period()])
         table_data.append(["Bollinger Band SMA period", self.get_bollinger_band_sma_period()])
         table_data.append(["CCI Limit", self.get_cci_limit()])
+        table_data.append(["Stochastic Oscillator period", self.get_stochastic_oscillator_period()])
 
         table = AsciiTable(table_data)
         return table.table
