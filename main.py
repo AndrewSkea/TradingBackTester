@@ -6,6 +6,7 @@ from patternrecognition import recognition
 from methods import macd
 from methods import cci
 from methods import bollingerbands
+from methods import stochastic_oscillator
 import pstats
 from multiprocessing import Pool
 
@@ -83,6 +84,10 @@ class Main(object):
         # This is creating the Bollinger Band class instance and calculating the initial arrays
         bband_class = bollingerbands.BollingerBands(close_price, self.constants)
         bband_class.calculate_initial_arrays()
+        # This is creating the Stochastic Oscillator Class
+        stoch_osc = stochastic_oscillator.StochasticOscillator(high_price=high_price, low_price=low_price,
+                                                               close_price=close_price, constant_class=self.constants)
+        stoch_osc.calculate_stoch_osc_initial_array()
 
         # Creates recognition class instance
         _recognition = recognition.PatternRecognition(pattern_array,
@@ -94,22 +99,11 @@ class Main(object):
                                                              self.constants,
                                                              macd_class,
                                                              cci_class,
-                                                             bband_class)
+                                                             bband_class,
+                                                             stoch_osc)
         # Starts the recognition on the pattern and the live data from the api in the class
         return _recognition.start()
 
 constants = constants.Constants()
 main_class = Main(constants)
 main_class.start()
-
-# option = raw_input('Profiler (y/n): ')
-# if option == 'n':
-#     constants = constants.Constants()
-#     main_class = Main(constants)
-#     main_class.start()
-# else:
-#     constants = constants.Constants()
-#     main_class = Main(constants)
-#     cProfile.run('main_class.start()', 'profiler_stats', 4)
-#     p = pstats.Stats('profiler_stats')
-#     p.strip_dirs().sort_stats(-1).print_stats()
