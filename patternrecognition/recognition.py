@@ -110,7 +110,7 @@ class PatternRecognition:
         print ('No patterns in: '.format(final_time))
 
     def log_and_get_percentage_win(self, result_dict):
-        table_data = [['PC', 'MACD', 'CCI', 'BBAND', 'STOCH_OSC', 'Num Buys', 'Num Sells', 'Ratio']]
+        table_data = [['PC', 'MACD', 'CCI', 'BBAND', 'STOCH_OSC', '', '', 'Num Buys', 'Num Sells', 'Ratio']]
         for key, value in result_dict.items():
             if (value[0] != 0 or value[1] != 0) and key.count(-1) < 5:
                 key_final = []
@@ -129,7 +129,7 @@ class PatternRecognition:
                     else:
                         ratio = value[0]
 
-                table_data.append([key_final[0], key_final[1], key_final[2], key_final[3], key_final[4],
+                table_data.append([key_final[0], key_final[1], key_final[2], key_final[3], key_final[4], '', '',
                                    value[0], value[1], "%.2f" % ratio])
 
         results_table = AsciiTable(table_data)

@@ -75,8 +75,9 @@ class GeneticAlgorithm:
         for i in range(len(agent_array)):
             for j in range(i):
                 choice_array.append(i)
-        for i in range(len(agent_array)):
-            num = randint(0, len(choice_array))
+        print(choice_array)
+        for i in range(self._num_agents):
+            num = randint(0, len(choice_array)-1)
             num = choice_array[num]
             final_choice_array.append(agent_array[num])
         assert len(agent_array) == len(final_choice_array)

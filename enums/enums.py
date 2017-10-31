@@ -21,7 +21,7 @@ class Option(Enum):
     NO_TRADE = 3
 
 
-class Direction(Enum):
+class Trend(Enum):
     UP = 0,
     DOWN = 1,
     STRAIGHT = 2

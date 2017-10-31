@@ -64,6 +64,7 @@ class Main(object):
         # Sets an instance of the data loader that gets all the percentage change arrays
         _loader = loaddata.loader.Loader(all_data_array, self.constants)
         # Return the tuple of the 4 arrays
+        print('Start Loading Data is called')
         return _loader.pattern_storage()
 
     def start_pattern_recognition(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price, _patterns_array_tuple):

@@ -1,6 +1,20 @@
 from methods.typical_price import TypicalPrice
-from enums.enums import Option
+from enums.enums import Option, Trend
 import time
+
+def percent_change(_start_point, _current_point):
+    try:
+        if _start_point > _current_point:
+            x = -((float(_start_point) - float(_current_point)) / abs(_current_point)) * 100
+        else:
+            x = ((float(_current_point) - float(_start_point)) / abs(_start_point)) * 100
+        if x == 0.0:
+            return 0.000000001
+        else:
+            return x
+    except:
+        return 0.000000001
+
 
 class CCI:
     """
@@ -29,6 +43,13 @@ class CCI:
         # This makes the tp class calculate the standard deviation array for the tp class
         self._tp_class.calculate_initial_md_array()
         self._md_array = self._tp_class.get_standard_deviation_array_for_tp()
+        self._trend_index = 0
+        # MAKE SURE THIS IS DIVISIBLE BY 4
+        self._trend_length = 60
+        # Percentage change period
+        self._pc_period = 20
+        # Percentage change array for CCI
+        self._pc_cci = []
 
     def calculate_cci_initial_array(self):
         """
@@ -41,6 +62,11 @@ class CCI:
                                        (self._cci_constant * self._md_array[i]))
             except IndexError:
                 print('Index Error at index: ', i)
+        for j in range(len(self._cci_array) - (self._pc_period * 5), len(self._cci_array), self._pc_period):
+            try:
+                self._pc_cci.append((self._cci_array[j-self._pc_period:j]))
+            except IndexError as e:
+                print('Index error in pc of cci:, ', e)
 
     def add_to_cci_array(self, close, high, low):
         tp, sma, dev = self._tp_class.add_last_point(close, high, low)
@@ -56,11 +82,37 @@ class CCI:
         return self._cci_array
 
     def get_result(self):
+        result_array = []
+        cci_array = self._cci_array[-self._pc_period:]
+        for pattern in self._cci_array:
+            for n in range(len(pattern)):
+                if pattern[n] - 7 < cci_array[n] < pattern[n] - 7:
+                    pass
+                else:
+                    continue
+            print('CCI array has been very similar before')
+            result_array.append(pattern)
+
+        if len(result_array) > 2:
+            
+
+
+        trend = Trend.STRAIGHT
         option = Option.NO_TRADE
-        if int(self._cci_array[-1]) > self._cci_limit:
-            option = Option.SELL
-        elif int(self._cci_array[-1]) < -self._cci_limit:
+        num = int(self._trend_length/4)
+        avg_1 = sum(self._cci_array[-self._trend_length:-(3 * num)]) / num
+        avg_2 = sum(self._cci_array[-(3 * num):-int(self._trend_length / 2)]) / num
+        avg_3 = sum(self._cci_array[-int(self._trend_length / 2):-num]) / num
+        avg_4 = sum(self._cci_array[-num:-1]) / num
+        if avg_4 > avg_3 > avg_2 > avg_1:
+            trend = Trend.UP
+        elif avg_4 < avg_3 < avg_2 < avg_1:
+            trend = Trend.DOWN
+
+        if int(self._cci_array[-1]) > -20 and trend == Trend.UP:
             option = Option.BUY
+        elif int(self._cci_array[-1]) < 20 and trend == Trend.DOWN:
+            option = Option.SELL
         return option, 0
 
     def get_amount_of_consecutive_times_cci_is_overtraded(self):
