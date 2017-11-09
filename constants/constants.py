@@ -16,7 +16,7 @@ class Constants:
         # Required difference of the predicted outcome to the last point in the array. Greater the better
         self._required_difference = 0.0008667758668977133
         # The amount of patterns to skip every iteration to provide more variety
-        self._interval_size = 20
+        self._interval_size = 1
         # The period for ema 1 for the macd
         self._ema_a_period = 9
         # The period for ema 2 for the macd

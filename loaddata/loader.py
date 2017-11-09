@@ -42,8 +42,7 @@ class Loader:
         _start_time = time.time()
         # This is the data length that is going to be used so tht it doesn't go until the end because there
         # won't be any data +30 points in the future then
-        _used_data_length = int(int(
-            self._all_data_length - (2 * (self.constants.get_pattern_len() - 1))) / self.constants.get_interval_size())
+        _used_data_length = int(self._all_data_length - (2 * self.constants.get_pattern_len()) - 1)
         _current_index = self.constants.get_pattern_len()
         # Goes through all the data to get the percentage change through all of it
         while _current_index < _used_data_length:
@@ -67,14 +66,12 @@ class Loader:
             _current_index += 1
 
         # This will change the  results into candles of X minutes
-        # self.make_into_different_candles()
-
+        self.make_into_different_candles()
         return (self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price,
-               self._low_price, self._close_price)
+                self._low_price, self._close_price)
 
     def make_into_different_candles(self):
         candle_period = 5
-        print('Candle Period: ', candle_period)
         before_length_of_close_price = len(self._close_price)
         temp_pattern_array = []
         temp_performance = []
@@ -106,7 +103,7 @@ class Loader:
 
         if len(self._close_price) == len(self._high_price) == len(self._low_price) == len(self._open_price) == len(
                 self._time):
-            print('Before: {}     After: {}: '.format(before_length_of_close_price, len(self._close_price)))
+            print('Before: {}\nAfter: {}\n'.format(before_length_of_close_price, len(self._close_price)))
         else:
             print('DATA ARRAYS ARE NOT THE SAME LENGTH')
 

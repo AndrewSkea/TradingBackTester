@@ -3,6 +3,7 @@ from enums import enums
 from methods.percentage_change import PercentageChange
 from databases import LogHandler
 from terminaltables import AsciiTable
+import sys
 
 
 class PatternRecognition:
@@ -107,7 +108,7 @@ class PatternRecognition:
         :return: null
         """
         # Prints that there are no patterns and inserts the data into the db
-        print ('No patterns in: '.format(final_time))
+        print('No patterns in: '.format(final_time))
 
     def log_and_get_percentage_win(self, result_dict):
         table_data = [['PC', 'MACD', 'CCI', 'BBAND', 'STOCH_OSC', '', '', 'Num Buys', 'Num Sells', 'Ratio']]
@@ -133,11 +134,12 @@ class PatternRecognition:
                                    value[0], value[1], "%.2f" % ratio])
 
         results_table = AsciiTable(table_data)
-        print(results_table.table)
+        print('\n', results_table.table)
 
         constants_class_state_table = self.constants.get_str_table()
 
         _file = open("logdata/log.txt", 'a')
+        _file.write("\n\######################################################################################\n ")
         _file.write(constants_class_state_table)
         _file.write("\n\n\n")
         _file.write(results_table.table)
@@ -154,6 +156,9 @@ class PatternRecognition:
         max_iterations = len(self.pattern_data_tuples[0])
         index = 0
         while index < max_iterations - 1:
+            sys.stdout.write('\r')
+            sys.stdout.write('{} / {} : {}%'.format(index, max_iterations, round(float(100*index/max_iterations), 1)))
+            sys.stdout.flush()
             # Run recognition on the current pattern
             result_tuple, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
                                                           self._low[index], self._high[index])
