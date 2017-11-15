@@ -1,6 +1,6 @@
 from methods.typical_price import TypicalPrice
 from enums.enums import Option, Trend
-import time
+
 
 def percent_change(_start_point, _current_point):
     try:
@@ -62,11 +62,11 @@ class CCI:
                                        (self._cci_constant * self._md_array[i]))
             except IndexError:
                 print('Index Error at index: ', i)
-        for j in range(len(self._cci_array) - (self._pc_period * 10), len(self._cci_array), self._pc_period):
-            try:
-                self._pc_cci.append((self._cci_array[j-self._pc_period:j]))
-            except IndexError as e:
-                print('Index error in pc of cci:, ', e)
+        # for j in range(len(self._cci_array) - (self._pc_period * 10), len(self._cci_array), self._pc_period):
+        #     try:
+        #         self._pc_cci.append((self._cci_array[j - self._pc_period:j]))
+        #     except IndexError as e:
+        #         print('Index error in pc of cci:, ', e)
 
     def add_to_cci_array(self, close, high, low):
         tp, sma, dev = self._tp_class.add_last_point(close, high, low)
@@ -82,67 +82,76 @@ class CCI:
         return self._cci_array
 
     def get_result(self):
-        result_array = []
-        cci_array = self._cci_array[-self._pc_period:]
-        res = []
-        for pattern in self._pc_cci:
-            # num_similar = 0
-            # for n in range(len(pattern)):
-            #     if pattern[n] - 20 < cci_array[n] < pattern[n] + 20:
-            #         num_similar += 1
-            num = int(len(pattern) / 2)
-            avg_1 = float(sum(pattern[:num])) / float(num)
-            avg_4 = float(sum(pattern[num:])) / float(num)
 
-            if avg_1 < avg_4:
-                res.append(Trend.UP)
-            elif avg_4 < avg_1:
-                res.append(Trend.DOWN)
-            # if num_similar > 10:
-            #     result_array.append(pattern)
-        if res.count(Trend.UP) > res.count(Trend.DOWN) + 3:
-            final_res = Trend.UP
-        elif res.count(Trend.DOWN) > res.count(Trend.UP) + 3:
-            final_res = Trend.DOWN
-        else:
-            final_res = Trend.STRAIGHT
-
-        pat_num = int(len(cci_array) / 2)
-        pat_avg_1 = float(sum(cci_array[:pat_num])) / float(pat_num)
-        pat_avg_4 = float(sum(cci_array[pat_num:])) / float(pat_num)
-
-        if pat_avg_1 < pat_avg_4 and final_res == Trend.UP:
+        if self._cci_array[-1] > 100 and self._cci_array[-2] < 100:
             return Option.BUY, 0
-        elif pat_avg_4 < pat_avg_1 and final_res == Trend.DOWN:
+        elif self._cci_array[-1] < -100 and self._cci_array[-2] > -100:
             return Option.SELL, 0
-        else:
-            return Option.NO_TRADE, 0
 
-        # option = Option.NO_TRADE
-        # trend = []
-        # final_trend = Trend.STRAIGHT
-        # print(len(result_array))
-        # if len(result_array) >= 1:
-        #     for pat in result_array:
-        #         num = int(len(pat) / 2)
-        #         avg_1 = float(sum(pat[:num])) / float(num)
-        #         avg_4 = float(sum(pat[num:])) / float(num)
-        #         print(avg_1, '  :  ', avg_4)
-        #         if avg_4 > avg_1:
-        #             trend.append(Trend.UP)
-        #             print('UP')
-        #         elif avg_4 < avg_1:
-        #             trend.append(Trend.DOWN)
-        #             print('DOWN')
-        #     if trend.count(Trend.UP) > trend.count(Trend.DOWN):
-        #         final_trend = Trend.UP
-        #     elif trend.count(Trend.UP) < trend.count(Trend.DOWN):
-        #         final_trend = Trend.DOWN
-        #     if final_trend == Trend.UP:             # int(self._cci_array[-1]) > -20 and
-        #         option = Option.BUY
-        #     elif final_trend == Trend.DOWN:         # int(self._cci_array[-1]) < 20 and
-        #         option = Option.SELL
-        # return option, 0
+        return Option.NO_TRADE, 0
+
+        # result_array = []
+        #
+        # cci_array = self._cci_array[-self._pc_period:]
+        # res = []
+        # for pattern in self._pc_cci:
+        #     # num_similar = 0
+        #     # for n in range(len(pattern)):
+        #     #     if pattern[n] - 20 < cci_array[n] < pattern[n] + 20:
+        #     #         num_similar += 1
+        #     num = int(len(pattern) / 2)
+        #     avg_1 = float(sum(pattern[:num])) / float(num)
+        #     avg_4 = float(sum(pattern[num:])) / float(num)
+        #
+        #     if avg_1 < avg_4:
+        #         res.append(Trend.UP)
+        #     elif avg_4 < avg_1:
+        #         res.append(Trend.DOWN)
+        #         # if num_similar > 10:
+        #         #     result_array.append(pattern)
+        # if res.count(Trend.UP) > res.count(Trend.DOWN) + 3:
+        #     final_res = Trend.UP
+        # elif res.count(Trend.DOWN) > res.count(Trend.UP) + 3:
+        #     final_res = Trend.DOWN
+        # else:
+        #     final_res = Trend.STRAIGHT
+        #
+        # pat_num = int(len(cci_array) / 2)
+        # pat_avg_1 = float(sum(cci_array[:pat_num])) / float(pat_num)
+        # pat_avg_4 = float(sum(cci_array[pat_num:])) / float(pat_num)
+        #
+        # if pat_avg_1 < pat_avg_4 and final_res == Trend.UP:
+        #     return Option.BUY, 0
+        # elif pat_avg_4 < pat_avg_1 and final_res == Trend.DOWN:
+        #     return Option.SELL, 0
+        # else:
+        #     return Option.NO_TRADE, 0
+
+            # option = Option.NO_TRADE
+            # trend = []
+            # final_trend = Trend.STRAIGHT
+            # print(len(result_array))
+            # if len(result_array) >= 1:
+            #     for pat in result_array:
+            #         num = int(len(pat) / 2)
+            #         avg_1 = float(sum(pat[:num])) / float(num)
+            #         avg_4 = float(sum(pat[num:])) / float(num)
+            #         print(avg_1, '  :  ', avg_4)
+            #         if avg_4 > avg_1:
+            #             trend.append(Trend.UP)
+            #             print('UP')
+            #         elif avg_4 < avg_1:
+            #             trend.append(Trend.DOWN)
+            #             print('DOWN')
+            #     if trend.count(Trend.UP) > trend.count(Trend.DOWN):
+            #         final_trend = Trend.UP
+            #     elif trend.count(Trend.UP) < trend.count(Trend.DOWN):
+            #         final_trend = Trend.DOWN
+            #     if final_trend == Trend.UP:             # int(self._cci_array[-1]) > -20 and
+            #         option = Option.BUY
+            #     elif final_trend == Trend.DOWN:         # int(self._cci_array[-1]) < 20 and
+            #         option = Option.SELL
+            # return option, 0
 
     def get_amount_of_consecutive_times_cci_is_over_traded(self):
         """

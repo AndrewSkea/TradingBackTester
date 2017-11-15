@@ -3,9 +3,13 @@ from methods import sma
 from enums.enums import Option
 
 class BollingerBands:
-    def __init__(self, close_price, constants_class):
+    def __init__(self, high_prices, low_prices, close_prices, constants_class):
         # This is the set of close prices
-        self._all_close_prices = close_price
+        self._all_close_prices = close_prices
+        # This is the set of low prices
+        self._all_low_prices = low_prices
+        # This is the set of high prices
+        self._all_high_prices = high_prices
         # This is the constants class
         self._constants = constants_class
         # This is the sma period for the bollinger SMA
@@ -14,12 +18,12 @@ class BollingerBands:
         self._middle_band_sma = sma.SMA(self._all_close_prices, self._bband_sma_period)
         # This is the middle band
         self._middle_band = []
-        # This is the SMA for the Upper Band
-        self._upper_band_sma = sma.SMA(self._all_close_prices, self._bband_sma_period)
+        # # This is the SMA for the Upper Band
+        # self._upper_band_sma = sma.SMA(self._all_close_prices, self._bband_sma_period)
         # This is the Upper Band
         self._upper_band = []
-        # This is the lower band sma class
-        self._lower_band_sma = sma.SMA(self._all_close_prices, self._bband_sma_period)
+        # # This is the lower band sma class
+        # self._lower_band_sma = sma.SMA(self._all_close_prices, self._bband_sma_period)
         # This is the Lower band
         self._lower_band = []
         # This is the standard deviation array
@@ -81,9 +85,14 @@ class BollingerBands:
 
     def get_result(self):
         if self._all_close_prices[-1] < self._lower_band[-1]:
-            return Option.BUY
-        elif self._all_close_prices[-1] > self._upper_band[-1]:
             return Option.SELL
+        elif self._all_close_prices[-1] > self._upper_band[-1]:
+            return Option.BUY
+        elif self._all_high_prices[-1] > self._upper_band[-1] > self._all_close_prices[-1]:
+            return Option.SELL
+        elif self._all_low_prices[-1] < self._lower_band[-1] < self._all_close_prices[-1]:
+            return Option.BUY
         else:
             return Option.NO_TRADE
+
 

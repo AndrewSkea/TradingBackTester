@@ -55,6 +55,8 @@ class PatternRecognition:
         self._bband = bband_class
         # THis is the Stochastic Oscillator classs
         self._stoch_osc = stoch_osc
+        # Result array
+        self._temp_res_array = []
 
     def recognition(self, pattern, close_value, low_value, high_value):
         """
@@ -155,68 +157,62 @@ class PatternRecognition:
         # Number of patterns there are
         max_iterations = len(self.pattern_data_tuples[0])
         index = 0
-        while index < max_iterations - 1:
+        while index < max_iterations - 31:
             sys.stdout.write('\r')
-            sys.stdout.write('{} / {} : {}%'.format(index, max_iterations, round(float(100*index/max_iterations), 1)))
+            sys.stdout.write(
+                '{} / {} : {}%'.format(index, max_iterations, round(float(100 * index / max_iterations), 1)))
             sys.stdout.flush()
             # Run recognition on the current pattern
             result_tuple, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
-                                                          self._low[index], self._high[index])
+                                                                self._low[index], self._high[index])
             if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
                 try:
                     temp = result_dict[result_tuple]
-                    result_dict.update({result_tuple: (temp[0]+1, temp[1])})
+                    result_dict.update({result_tuple: (temp[0] + 1, temp[1])})
                 except KeyError:
                     result_dict.update({result_tuple: (0, 0)})
             elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
                 try:
                     temp = result_dict[result_tuple]
-                    result_dict.update({result_tuple: (temp[0], temp[1]+1)})
+                    result_dict.update({result_tuple: (temp[0], temp[1] + 1)})
                 except KeyError:
                     result_dict.update({result_tuple: (0, 0)})
             index += 1
 
         self.log_and_get_percentage_win(result_dict)
 
-        temp_res_array = []
         for key, value in result_dict.items():
             if key.count(1) == 3:
                 try:
-                    if value[0] + value[1] > 100:
-                        temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
+                    if value[0] + value[1] > 50:
+                        self._temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
                 except ZeroDivisionError:
                     pass
             elif key.count(1) == 2:
                 try:
-                    if value[0] + value[1] > 100:
-                        temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
+                    if value[0] + value[1] > 50:
+                        self._temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
                 except ZeroDivisionError:
                     pass
             elif key.count(0) == 3:
                 try:
-                    if value[0] + value[1] > 100:
-                        temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
+                    if value[0] + value[1] > 50:
+                        self._temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
                 except ZeroDivisionError:
                     pass
             elif key.count(0) == 2:
                 try:
-                    if value[0] + value[1] > 100:
-                        temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
+                    if value[0] + value[1] > 50:
+                        self._temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
                 except ZeroDivisionError:
                     pass
         try:
-            temp_res_array.remove(0)
+            self._temp_res_array.remove(0)
         except:
             pass
         try:
-            max_res = float(sum(temp_res_array)) / float(len(temp_res_array))
-            print('Max results is: ', max_res, 'with: ', temp_res_array)
+            max_res = float(sum(self._temp_res_array)) / float(len(self._temp_res_array))
+            print('Max results is: ', max_res, 'with: ', self._temp_res_array)
             return max_res
         except:
             return 0
-
-
-
-
-
-

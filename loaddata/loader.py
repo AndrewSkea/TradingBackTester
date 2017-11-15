@@ -55,22 +55,22 @@ class Loader:
             _outcome_range = self._close_prices_for_loading[_current_index + 1]
             _current_point = self._close_prices_for_loading[_current_index]
             _future_outcome = percent_change(_current_point, _outcome_range)
-
             self._pattern_array.append(pattern)
             self._performance_array.append(_future_outcome)
-            self._time.append(self._all_data[_current_index][1])
-            self._open_price.append(self._all_data[_current_index][2])
-            self._high_price.append(self._all_data[_current_index][3])
-            self._low_price.append(self._all_data[_current_index][4])
-            self._close_price.append(self._all_data[_current_index][5])
+            self._time.append(self._all_data[_current_index][2])
+            self._open_price.append(self._all_data[_current_index][3])
+            self._high_price.append(self._all_data[_current_index][4])
+            self._low_price.append(self._all_data[_current_index][5])
+            self._close_price.append(self._all_data[_current_index][6])
             _current_index += 1
 
         # This will change the  results into candles of X minutes
-        self.make_into_different_candles()
+        # self.make_into_different_candles()
         return (self._pattern_array, self._performance_array, self._time, self._open_price, self._high_price,
                 self._low_price, self._close_price)
 
     def make_into_different_candles(self):
+        print('Running Different Candles')
         candle_period = 5
         before_length_of_close_price = len(self._close_price)
         temp_pattern_array = []
