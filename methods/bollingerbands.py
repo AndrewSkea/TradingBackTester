@@ -84,15 +84,26 @@ class BollingerBands:
         self._band_width.append(abs(self._upper_band[-1] - self._lower_band[-1]))
 
     def get_result(self):
-        if self._all_close_prices[-1] < self._lower_band[-1]:
-            return Option.SELL
-        elif self._all_close_prices[-1] > self._upper_band[-1]:
-            return Option.BUY
-        elif self._all_high_prices[-1] > self._upper_band[-1] > self._all_close_prices[-1]:
-            return Option.SELL
-        elif self._all_low_prices[-1] < self._lower_band[-1] < self._all_close_prices[-1]:
-            return Option.BUY
-        else:
-            return Option.NO_TRADE
+        try:
+            result_array = []
+            for num in range(-3, 0, 1):
+                if self._all_close_prices[num] < self._lower_band[num]:
+                    result_array.append(Option.SELL)
+                elif self._all_close_prices[num] > self._upper_band[num]:
+                    result_array.append(Option.BUY)
+                elif self._all_high_prices[num] > self._upper_band[num] > self._all_close_prices[num]:
+                    result_array.append(Option.SELL)
+                elif self._all_low_prices[num] < self._lower_band[num] < self._all_close_prices[num]:
+                    result_array.append(Option.BUY)
+                else:
+                    result_array.append(Option.NO_TRADE)
 
+            if result_array.count(Option.BUY) >= 3:
+                return Option.BUY
+            elif result_array.count(Option.SELL) >= 3:
+                return Option.SELL
+            else:
+                return Option.NO_TRADE
+        except IndexError:
+            return Option.NO_TRADE
 

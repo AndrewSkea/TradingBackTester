@@ -110,9 +110,9 @@ class MACD:
         # If there is a new value on the array
         if self._is_new_value:
             self._is_new_value = False
-            if self._crossover_array[-1] == Trend.UP:
+            if self._crossover_array[-1] == Trend.UP and self._macd_array[-1] > self._macd_array[-2] > self._macd_array[-3]:
                 option = Option.BUY
-            elif self._crossover_array[-1] == Trend.DOWN:
+            elif self._crossover_array[-1] == Trend.DOWN and self._macd_array[-1] < self._macd_array[-2] < self._macd_array[-3]:
                 option = Option.SELL
             else:
                 option = Option.NO_TRADE

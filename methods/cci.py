@@ -62,11 +62,6 @@ class CCI:
                                        (self._cci_constant * self._md_array[i]))
             except IndexError:
                 print('Index Error at index: ', i)
-        # for j in range(len(self._cci_array) - (self._pc_period * 10), len(self._cci_array), self._pc_period):
-        #     try:
-        #         self._pc_cci.append((self._cci_array[j - self._pc_period:j]))
-        #     except IndexError as e:
-        #         print('Index error in pc of cci:, ', e)
 
     def add_to_cci_array(self, close, high, low):
         tp, sma, dev = self._tp_class.add_last_point(close, high, low)
@@ -82,10 +77,13 @@ class CCI:
         return self._cci_array
 
     def get_result(self):
-
-        if self._cci_array[-1] > 100 and self._cci_array[-2] < 100:
+        if self._cci_array[-1] > 100 and self._cci_array[-2] > 100 and self._cci_array[-3] > 100:
+            return Option.SELL, 0
+        elif self._cci_array[-1] < -100 and self._cci_array[-2] < -100 and self._cci_array[-3] < -100:
             return Option.BUY, 0
-        elif self._cci_array[-1] < -100 and self._cci_array[-2] > -100:
+        elif self._cci_array[-1] > 100 > self._cci_array[-2] > self._cci_array[-3]:
+            return Option.BUY, 0
+        elif self._cci_array[-1] < -100 < self._cci_array[-2] < self._cci_array[-3]:
             return Option.SELL, 0
 
         return Option.NO_TRADE, 0

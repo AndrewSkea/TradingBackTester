@@ -48,9 +48,21 @@ class StochasticOscillator:
                 * 100)
 
     def get_result(self):
-        if self._stoch_osc_array[-1] > 90:
-            return Option.SELL
-        elif self._stoch_osc_array[-1] < 10:
-            return Option.BUY
-        else:
+        try:
+            result_array = []
+            for num in range(-3, 0, 1):
+                if self._stoch_osc_array[num] > 80:
+                    result_array.append(Option.SELL)
+                elif self._stoch_osc_array[num] < 20:
+                    result_array.append(Option.BUY)
+                else:
+                    result_array.append(Option.NO_TRADE)
+
+            if result_array.count(Option.BUY) >= 3:
+                return Option.BUY
+            elif result_array.count(Option.SELL) >= 3:
+                return Option.SELL
+            else:
+                return Option.NO_TRADE
+        except IndexError:
             return Option.NO_TRADE
