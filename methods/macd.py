@@ -1,4 +1,4 @@
-from enums.enums import Position, Direction, Option
+from enums.enums import Position, Trend, Option
 from methods import ema
 import functools
 
@@ -68,9 +68,9 @@ class MACD:
                 self._last_position = self._crossover_array[-1]
             if self._last_position != self._position:
                 if self._last_position == Position.ABOVE:
-                    self._crossover_array.append(Direction.DOWN)
+                    self._crossover_array.append(Trend.DOWN)
                 else:
-                    self._crossover_array.append(Direction.UP)
+                    self._crossover_array.append(Trend.UP)
                 self._last_position = self._position
                 self._is_new_value = True
         except Exception as e:
@@ -96,9 +96,9 @@ class MACD:
 
             if self._last_position != self._position:
                 if self._last_position == Position.ABOVE:
-                    self._crossover_array.append(Direction.DOWN)
+                    self._crossover_array.append(Trend.DOWN)
                 else:
-                    self._crossover_array.append(Direction.UP)
+                    self._crossover_array.append(Trend.UP)
             self._last_position = self._position
             self._is_new_value = True
 
@@ -110,9 +110,9 @@ class MACD:
         # If there is a new value on the array
         if self._is_new_value:
             self._is_new_value = False
-            if self._crossover_array[-1] == Direction.UP:
+            if self._crossover_array[-1] == Trend.UP:
                 option = Option.BUY
-            elif self._crossover_array[-1] == Direction.DOWN:
+            elif self._crossover_array[-1] == Trend.DOWN:
                 option = Option.SELL
             else:
                 option = Option.NO_TRADE

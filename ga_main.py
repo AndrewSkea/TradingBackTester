@@ -75,8 +75,9 @@ class GeneticAlgorithm:
         for i in range(len(agent_array)):
             for j in range(i):
                 choice_array.append(i)
-        for i in range(len(agent_array)):
-            num = randint(0, len(choice_array))
+        print(choice_array)
+        for i in range(self._num_agents):
+            num = randint(0, len(choice_array)-1)
             num = choice_array[num]
             final_choice_array.append(agent_array[num])
         assert len(agent_array) == len(final_choice_array)
@@ -237,8 +238,8 @@ class GeneticMain(object):
         # Starts db instance
         _past_data = self.start_db()
         # Starts the loading of data from the db and passes it into the recognition class
-        pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price = self.start_loading_data(
-            all_data_array=_past_data[0])
+        pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price = \
+            self.start_loading_data(all_data_array=_past_data[0])
         # this is the tuple of the arrays of the patterns we will consider 'live' patterns
         _patterns_array_tuple = self.start_loading_data(all_data_array=_past_data[1])
         # Starts the recognition part of the program

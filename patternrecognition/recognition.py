@@ -3,6 +3,7 @@ from enums import enums
 from methods.percentage_change import PercentageChange
 from databases import LogHandler
 from terminaltables import AsciiTable
+import sys
 
 
 class PatternRecognition:
@@ -54,6 +55,8 @@ class PatternRecognition:
         self._bband = bband_class
         # THis is the Stochastic Oscillator classs
         self._stoch_osc = stoch_osc
+        # Result array
+        self._temp_res_array = []
 
     def recognition(self, pattern, close_value, low_value, high_value):
         """
@@ -107,10 +110,10 @@ class PatternRecognition:
         :return: null
         """
         # Prints that there are no patterns and inserts the data into the db
-        print ('No patterns in: '.format(final_time))
+        print('No patterns in: '.format(final_time))
 
     def log_and_get_percentage_win(self, result_dict):
-        table_data = [['PC', 'MACD', 'CCI', 'BBAND', 'STOCH_OSC', 'Num Buys', 'Num Sells', 'Ratio']]
+        table_data = [['PC', 'MACD', 'CCI', 'BBAND', 'STOCH_OSC', '', '', 'Num Buys', 'Num Sells', 'Ratio']]
         for key, value in result_dict.items():
             if (value[0] != 0 or value[1] != 0) and key.count(-1) < 5:
                 key_final = []
@@ -129,15 +132,16 @@ class PatternRecognition:
                     else:
                         ratio = value[0]
 
-                table_data.append([key_final[0], key_final[1], key_final[2], key_final[3], key_final[4],
+                table_data.append([key_final[0], key_final[1], key_final[2], key_final[3], key_final[4], '', '',
                                    value[0], value[1], "%.2f" % ratio])
 
         results_table = AsciiTable(table_data)
-        print(results_table.table)
+        print('\n', results_table.table)
 
         constants_class_state_table = self.constants.get_str_table()
 
         _file = open("logdata/log.txt", 'a')
+        _file.write("\n\######################################################################################\n ")
         _file.write(constants_class_state_table)
         _file.write("\n\n\n")
         _file.write(results_table.table)
@@ -153,65 +157,62 @@ class PatternRecognition:
         # Number of patterns there are
         max_iterations = len(self.pattern_data_tuples[0])
         index = 0
-        while index < max_iterations - 1:
+        while index < max_iterations - 31:
+            sys.stdout.write('\r')
+            sys.stdout.write(
+                '{} / {} : {}%'.format(index, max_iterations, round(float(100 * index / max_iterations), 1)))
+            sys.stdout.flush()
             # Run recognition on the current pattern
             result_tuple, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
-                                                          self._low[index], self._high[index])
+                                                                self._low[index], self._high[index])
             if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
                 try:
                     temp = result_dict[result_tuple]
-                    result_dict.update({result_tuple: (temp[0]+1, temp[1])})
+                    result_dict.update({result_tuple: (temp[0] + 1, temp[1])})
                 except KeyError:
                     result_dict.update({result_tuple: (0, 0)})
             elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
                 try:
                     temp = result_dict[result_tuple]
-                    result_dict.update({result_tuple: (temp[0], temp[1]+1)})
+                    result_dict.update({result_tuple: (temp[0], temp[1] + 1)})
                 except KeyError:
                     result_dict.update({result_tuple: (0, 0)})
             index += 1
 
         self.log_and_get_percentage_win(result_dict)
 
-        temp_res_array = []
         for key, value in result_dict.items():
             if key.count(1) == 3:
                 try:
-                    if value[0] + value[1] > 100:
-                        temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
+                    if value[0] + value[1] > 50:
+                        self._temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
                 except ZeroDivisionError:
                     pass
             elif key.count(1) == 2:
                 try:
-                    if value[0] + value[1] > 100:
-                        temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
+                    if value[0] + value[1] > 50:
+                        self._temp_res_array.append(float(value[0]) / float(value[0] + value[1]))
                 except ZeroDivisionError:
                     pass
             elif key.count(0) == 3:
                 try:
-                    if value[0] + value[1] > 100:
-                        temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
+                    if value[0] + value[1] > 50:
+                        self._temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
                 except ZeroDivisionError:
                     pass
             elif key.count(0) == 2:
                 try:
-                    if value[0] + value[1] > 100:
-                        temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
+                    if value[0] + value[1] > 50:
+                        self._temp_res_array.append(float(value[1]) / float(value[0] + value[1]))
                 except ZeroDivisionError:
                     pass
         try:
-            temp_res_array.remove(0)
+            self._temp_res_array.remove(0)
         except:
             pass
         try:
-            max_res = float(sum(temp_res_array)) / float(len(temp_res_array))
-            print('Max results is: ', max_res, 'with: ', temp_res_array)
+            max_res = float(sum(self._temp_res_array)) / float(len(self._temp_res_array))
+            print('Max results is: ', max_res, 'with: ', self._temp_res_array)
             return max_res
         except:
             return 0
-
-
-
-
-
-

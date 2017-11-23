@@ -20,23 +20,15 @@ class HistDBHandler(DBHandler):
 
     def get_all_data(self):
         # Set select string for getting all data from the database
-        _select_string = 'SELECT * FROM all_past_data WHERE id < (SELECT MAX(id)-{} FROM all_past_data) LIMIT {}'\
-            .format(self.constants_class.get_num_live_patterns(), self.constants_class.get_num_data_points())
+        _select_string = 'SELECT * FROM historic_data WHERE id < 20000 LIMIT 20000'
         # Get data from execute function
         return self.execute(string=_select_string, statement_type=enums.StatementType.SELECT)
 
     def get_all_pattern_data(self):
         # Set select string for getting all data from the database - ID is opposite way to time
-        _select_string = 'SELECT * FROM all_past_data where id > (SELECT MAX(id)-{} FROM all_past_data)'\
+        _select_string = 'SELECT * FROM historic_data where id > 20000 LIMIT 50000'\
             .format(self.constants_class.get_num_live_patterns())
         # Get data from execute function
         return self.execute(string=_select_string, statement_type=enums.StatementType.SELECT)
 
-    def get_all_data_for_indicators(self):
-        # Set select string for getting all data from the database - ID is opposite way to time
-        _select_string = 'SELECT * FROM all_past_data where id > (SELECT MAX(id)-{} FROM all_past_data) LIMIT {}'\
-            .format(self.constants_class.get_num_data_points_for_indicators(),
-                    self.constants_class.get_num_data_points_for_indicators())
-        # Get data from execute function
-        return self.execute(string=_select_string, statement_type=enums.StatementType.SELECT)
 

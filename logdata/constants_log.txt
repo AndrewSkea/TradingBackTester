@@ -88,3 +88,22 @@
 | Bollinger Band SMA period   | 45                    |
 | CCI Limit                   | 222                   |
 +-----------------------------+-----------------------+
++------------------------------+-----------------------+
+| Constant Name                | Value                 |
++------------------------------+-----------------------+
+| Pattern Length               | 40                    |
+| Number Patterns required     | 6882                  |
+| Pattern difference required  | 0.0008667758668977133 |
+| Interval size                | 20                    |
+| Number Live Patterns         | 110000                |
+| Number data points           | 250000                |
+| MACD EMA A period            | 74                    |
+| MACD EMA B period            | 109                   |
+| MACD Signal Period           | 10                    |
+| CCI Period                   | 42                    |
+| CCI Constant                 | 0.015                 |
+| Typical Price SMA period     | 67                    |
+| Bollinger Band SMA period    | 45                    |
+| CCI Limit                    | 192                   |
+| Stochastic Oscillator period | 29                    |
++------------------------------+-----------------------+
