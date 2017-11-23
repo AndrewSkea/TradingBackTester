@@ -8,7 +8,7 @@ import sys
 
 class PatternRecognition:
     def __init__(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price,
-                 _patterns_array_tuple, constants_class, macd_class, cci_class, bband_class, stoch_osc):
+                 _patterns_array_tuple, constants_class, macd_class, cci_class, bband_class, stoch_osc, rsi_class):
         """
         :param pattern_array:
         :param performance_array:
@@ -22,6 +22,8 @@ class PatternRecognition:
         :param macd_class:
         :param cci_class:
         :param bband_class:
+        :param stoch_osc:
+        :param rsi_class:
         """
         # Instance for the constants class
         self.constants = constants_class
@@ -57,6 +59,8 @@ class PatternRecognition:
         self._stoch_osc = stoch_osc
         # Result array
         self._temp_res_array = []
+        # This is the RSI Class
+        self._rsi = rsi_class
 
     def recognition(self, pattern, close_value, low_value, high_value):
         """
@@ -90,6 +94,9 @@ class PatternRecognition:
         self._stoch_osc.add_to_stoch(high_value, low_value, close_value)
         result_array.append(self._stoch_osc.get_result())
 
+        self._rsi.add_point(close_value)
+        rsi_value = self._rsi.get_result()
+
         index_of_array = 0
         for i in result_array:
             if i == enums.Option.BUY:
@@ -100,7 +107,7 @@ class PatternRecognition:
                 result_array[index_of_array] = -1
             index_of_array += 1
 
-        return tuple(result_array), cci_strength
+        return tuple(result_array), rsi_value
 
     def no_patterns(self, final_time):
         """
@@ -114,8 +121,8 @@ class PatternRecognition:
 
     def log_and_get_percentage_win(self, result_dict):
         table_data = [['PC', 'MACD', 'CCI', 'BBAND', 'STOCH_OSC', '', '', 'Num Buys', 'Num Sells', 'Ratio']]
-        for key, value in result_dict.items():
-            if (value[0] != 0 or value[1] != 0) and key.count(-1) < 5:
+        for key, value in result_dict:
+            if (value[0] != 0 or value[1] != 0) and key.count(-1) < 4:
                 key_final = []
                 for k in key:
                     if k == 0:
@@ -155,33 +162,38 @@ class PatternRecognition:
         """
         result_dict = {}
         # Number of patterns there are
-        max_iterations = len(self.pattern_data_tuples[0])
+        max_iterations = len(self._close)
         index = 0
         while index < max_iterations - 31:
-            sys.stdout.write('\r')
-            sys.stdout.write(
-                '{} / {} : {}%'.format(index, max_iterations, round(float(100 * index / max_iterations), 1)))
-            sys.stdout.flush()
             # Run recognition on the current pattern
             result_tuple, strength_of_option = self.recognition(self.pattern_data_tuples[0][index], self._close[index],
                                                                 self._low[index], self._high[index])
-            if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
-                try:
-                    temp = result_dict[result_tuple]
-                    result_dict.update({result_tuple: (temp[0] + 1, temp[1])})
-                except KeyError:
-                    result_dict.update({result_tuple: (0, 0)})
-            elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
-                try:
-                    temp = result_dict[result_tuple]
-                    result_dict.update({result_tuple: (temp[0], temp[1] + 1)})
-                except KeyError:
-                    result_dict.update({result_tuple: (0, 0)})
+            if strength_of_option > self.constants.get_rsi_limit():
+                if self.pattern_data_tuples[0][index] < self.pattern_data_tuples[0][index + 1]:
+                    try:
+                        temp = result_dict[result_tuple]
+                        result_dict.update({result_tuple: (temp[0] + 1, temp[1])})
+                    except KeyError:
+                        result_dict.update({result_tuple: (0, 0)})
+                elif self.pattern_data_tuples[0][index] > self.pattern_data_tuples[0][index + 1]:
+                    try:
+                        temp = result_dict[result_tuple]
+                        result_dict.update({result_tuple: (temp[0], temp[1] + 1)})
+                    except KeyError:
+                        result_dict.update({result_tuple: (0, 0)})
+
+            sys.stdout.write('\r{} / {} : {}%  Close: {}'.format(index,
+                                                                 max_iterations,
+                                                                 round(float(100 * index / max_iterations), 1),
+                                                                 self._close[index]))
+            sys.stdout.flush()
             index += 1
 
+        result_dict = sorted(result_dict.items(), key=lambda item: item[0].count(1 or 0))
+        result_dict.reverse()
         self.log_and_get_percentage_win(result_dict)
 
-        for key, value in result_dict.items():
+        for key, value in result_dict:
             if key.count(1) == 3:
                 try:
                     if value[0] + value[1] > 50:
@@ -210,9 +222,13 @@ class PatternRecognition:
             self._temp_res_array.remove(0)
         except:
             pass
+
         try:
-            max_res = float(sum(self._temp_res_array)) / float(len(self._temp_res_array))
-            print('Max results is: ', max_res, 'with: ', self._temp_res_array)
-            return max_res
+            avg_res = float(sum(self._temp_res_array)) / float(len(self._temp_res_array))
+            print('Avg Result: {}\nMax Result: {} \nNum results: {}'.format(round(100 * avg_res, 1),
+                                                                            round(100 * max(self._temp_res_array), 1),
+                                                                            len(self._temp_res_array)))
+            print("\n\n\r", self._temp_res_array)
+            return avg_res
         except:
             return 0

@@ -7,6 +7,7 @@ from methods import macd
 from methods import cci
 from methods import bollingerbands
 from methods import stochastic_oscillator
+from methods import rsi
 import pstats
 from multiprocessing import Pool
 
@@ -75,34 +76,41 @@ class Main(object):
         :return:
         """
         # Sets up the past data for the MACD and Ema
-        macd_class = macd.MACD(close_price, self.constants)
+        macd_class = macd.MACD(list(close_price), self.constants)
         macd_class.calculate_initial_macd_array()
         macd_class.calculate_initial_signal_array()
         macd_class.calculate_initial_crossover_array()
         # This creates the CCI class instance and starts all the initial calculations
-        cci_class = cci.CCI(high_price, low_price, close_price, self.constants)
+        cci_class = cci.CCI(list(high_price), list(low_price), list(close_price), self.constants)
         cci_class.calculate_cci_initial_array()
         # This is creating the Bollinger Band class instance and calculating the initial arrays
-        bband_class = bollingerbands.BollingerBands(high_prices=high_price, low_prices=low_price,
-                                                    close_prices=close_price, constants_class=self.constants)
+        bband_class = bollingerbands.BollingerBands(high_prices=list(high_price), low_prices=list(low_price),
+                                                    close_prices=list(close_price), constants_class=self.constants)
         bband_class.calculate_initial_arrays()
         # This is creating the Stochastic Oscillator Class
-        stoch_osc = stochastic_oscillator.StochasticOscillator(high_price=high_price, low_price=low_price,
-                                                               close_price=close_price, constant_class=self.constants)
+        stoch_osc = stochastic_oscillator.StochasticOscillator(high_price=list(high_price), low_price=list(low_price),
+                                                               close_price=list(close_price),
+                                                               constant_class=self.constants)
         stoch_osc.calculate_stoch_osc_initial_array()
 
+        # This creates the class for the RSI
+        rsi_class = rsi.RSI(close_prices=list(close_price), constant_class=self.constants)
+        # This calculate the initial arrays
+        rsi_class.calculate_initial_arrays()
+
         # Creates recognition class instance
-        _recognition = recognition.PatternRecognition(pattern_array,
-                                                      performance_array,
-                                                      time_ar, open_price,
-                                                      high_price, low_price,
-                                                      close_price,
-                                                      _patterns_array_tuple,
+        _recognition = recognition.PatternRecognition(list(pattern_array),
+                                                      list(performance_array),
+                                                      list(time_ar), list(open_price),
+                                                      list(high_price), list(low_price),
+                                                      list(close_price),
+                                                      list(_patterns_array_tuple),
                                                       self.constants,
                                                       macd_class,
                                                       cci_class,
                                                       bband_class,
-                                                      stoch_osc)
+                                                      stoch_osc,
+                                                      rsi_class)
         # Starts the recognition on the pattern and the live data from the api in the class
         return _recognition.start()
 
