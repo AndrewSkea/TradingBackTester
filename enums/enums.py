@@ -22,12 +22,12 @@ class Option(Enum):
 
 
 class Trend(Enum):
-    UP = 0,
-    DOWN = 1,
+    UP = 0
+    DOWN = 1
     STRAIGHT = 2
 
 
 class Position(Enum):
-    ABOVE = 0,
-    BELOW = 1,
+    ABOVE = 0
+    BELOW = 1
     EQUAL = 2

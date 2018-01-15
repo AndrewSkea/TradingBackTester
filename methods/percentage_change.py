@@ -18,8 +18,8 @@ def percent_change(_start_point, _current_point):
 class PercentageChange:
     def __init__(self, constants, _pattern_array, _performance_array):
         self.constants = constants
-        self._pattern_array = _pattern_array
-        self._performance_array = _performance_array
+        self._pattern_array = list(_pattern_array)
+        self._performance_array = list(_performance_array)
 
     def get_predicted_outcomes(self, pattern):
         """
