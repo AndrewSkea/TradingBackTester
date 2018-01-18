@@ -31,3 +31,18 @@ class Position(Enum):
     ABOVE = 0
     BELOW = 1
     EQUAL = 2
+
+
+class Indicators(Enum):
+    SMA = 0
+    EMA = 1
+    WMA = 2
+    CCI = 3
+    MACD = 4
+    BBAND = 5
+    AO = 6
+    CUST_1 = 7
+    PC = 8
+    RSI = 9
+    STOCHOSC = 10
+    TYPRI = 11

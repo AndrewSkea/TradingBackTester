@@ -106,7 +106,7 @@ class Main(object):
         third = len(open_price)/3
         half = len(open_price)/2
         full = len(open_price)
-        used = half
+        used = third
 
         open_price = open_price[-used:]
         high_price = high_price[-used:]

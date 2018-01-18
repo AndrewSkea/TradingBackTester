@@ -73,13 +73,13 @@ class CCI:
     def get_result(self):
         limit = 100
         if self._cci_array[-1] > limit and self._cci_array[-2] > limit and self._cci_array[-3] > limit:
-            return Option.SELL, 0
+            return Option.SELL
         elif self._cci_array[-1] < -limit and self._cci_array[-2] < -limit and self._cci_array[-3] < -limit:
-            return Option.BUY, 0
+            return Option.BUY
         elif self._cci_array[-1] > limit > self._cci_array[-2] > self._cci_array[-3]:
-            return Option.BUY, 0
+            return Option.BUY
         elif self._cci_array[-1] < -limit < self._cci_array[-2] < self._cci_array[-3]:
-            return Option.SELL, 0
+            return Option.SELL
 
-        return Option.NO_TRADE, 0
+        return Option.NO_TRADE
 

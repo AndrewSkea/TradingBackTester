@@ -39,11 +39,7 @@ class BollingerBands:
         """
         num_items = len(lst)
         mean = sum(lst) / num_items
-        try:
-            num = sqrt(sum([(x - mean) ** 2 for x in lst]) / (num_items - 1))
-        except ZeroDivisionError:
-            num = 0
-        return num
+        return sqrt(sum([(x - mean) ** 2 for x in lst]) / (num_items - 1)) if (num_items - 1) else 0
 
     def calculate_upper_band(self):
         for i in range(len(self._middle_band)):

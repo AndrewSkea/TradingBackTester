@@ -44,13 +44,13 @@ class RSI:
         """
         try:
             val = self._rsi[-1]
-            if val > 80:
+            if val > 85:
                 return Option.SELL
-            elif 60 <= val <= 80:
+            elif 60 <= val <= 85:
                 return Option.BUY
-            elif 20 <= val <= 40:
+            elif 15 <= val <= 40:
                 return Option.SELL
-            elif val < 20:
+            elif val < 15:
                 return Option.BUY
             else:
                 return Option.NO_TRADE
