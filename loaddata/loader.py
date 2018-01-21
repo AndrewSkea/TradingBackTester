@@ -20,7 +20,7 @@ class Loader:
         self._close_prices_for_loading = []
         # This is all the close prices of the database
         for i in all_data:
-            self._close_prices_for_loading.append(i[-1])
+            self._close_prices_for_loading.append(i)
         # The size of the array that holds all the data i.e. How many data points there are
         self._all_data_length = len(self._close_prices_for_loading)
         # Initialising the arrays

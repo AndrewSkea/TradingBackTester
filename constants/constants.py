@@ -18,27 +18,27 @@ class Constants:
         # The amount of patterns to skip every iteration to provide more variety
         self._interval_size = 1
         # The period for ema 1 for the macd
-        self._ema_a_period = 9
+        self._ema_a_period = 14
         # The period for ema 2 for the macd
         self._ema_b_period = 18
         # The signal period done on the macd
-        self._signal_period = 10
+        self._signal_period = 12
         # This is the CCI period
-        self._cci_period = 20
+        self._cci_period = 29
         # This is the CCI constant
         self._cci_constant = 0.015
         # This is the CCI limit
         self._cci_limit = 100
         # This is the typical price ema period
-        self._typical_price_sma_period = 18
+        self._typical_price_sma_period = 22
         # This is the sma period for the bollinger band
-        self._bollinger_band_sma_period = 25
+        self._bollinger_band_sma_period = 23
         # Stochastic Oscillator Period
-        self._stochastic_oscillator_period = 20
+        self._stochastic_oscillator_period = 22
         # RSI period
-        self._rsi_period = 11
+        self._rsi_period = 19
         # RSI limit
-        self._rsi_limit = 65
+        self._rsi_limit = 70
 
         ### THESE DON'T CHANGE DURING THE GENETIC ALGORITHM AS THEY ARE STATIC CONSTANTS, ONLY GETTERS ###
         # Number of the live patterns we are using (It will load always around 100 less than this number)

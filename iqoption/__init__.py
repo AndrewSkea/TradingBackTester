@@ -1,1 +1,1 @@
-import iqapi
+from iqoption.iqapi import *

@@ -7,13 +7,13 @@ class TypicalPrice:
         # This is the typical price array
         self._typical_price_array = []
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._high = high_price
+        self._high = list(high_price)
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._low = low_price
+        self._low = list(low_price)
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._close = close_price
+        self._close = list(close_price)
         # This is the SMA class - This isn't set yet because we are passing in the data as a parameter to the class
-        self._sma_class = None
+        self._sma_class = SMA(14)
         # This is the sma of the Typical Price
         self._sma_of_tp = []
         # This is the standard deviation array
@@ -25,10 +25,6 @@ class TypicalPrice:
         self._high.append(high_value)
         self._low.append(low_value)
         self._close.append(close_value)
-
-    def calculate_initial_array(self):
-        for i in range(len(self._close)):
-            self._typical_price_array.append(round((self._high[i] + self._close[i] + self._low[i]) / 3, 10))
 
     def add_last_point(self, close_value, high_value, low_value):
         self.add_to_data_arrays(close_value, high_value, low_value)
@@ -43,11 +39,6 @@ class TypicalPrice:
 
     def get_last_point_in_typical_price_array(self):
         return self._typical_price_array[-1]
-
-    def calculate_initial_sma_of_tp(self):
-        self._sma_class = SMA(self._typical_price_array, self._sma_period)
-        self._sma_class.calculate_initial_sma_array()
-        self._sma_of_tp = self._sma_class.get_sma_array()
 
     def add_to_sma_array(self, tp):
         self._sma_class.add_data_point(tp)
