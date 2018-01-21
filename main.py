@@ -8,7 +8,7 @@ from methods import cci
 from methods import bollingerbands
 from methods import stochastic_oscillator
 from methods import rsi
-from methods import custom_one, awesome_oscillator
+from methods import custom_one, awesome_oscillator, custom_two
 import numpy as np
 import pstats
 from multiprocessing import Pool
@@ -97,6 +97,8 @@ class Main(object):
         # This is the class for Custom One
         custom_one_class = custom_one.CustomOne(self.constants)
 
+        custom_two_class = custom_two.CustomTwo(self.constants)
+
         awesome_oscillator_class = awesome_oscillator.AwesomeOscillator(self.constants)
 
         open_price, high_price, low_price, close_price = np.loadtxt('eurusd.csv', unpack=True, delimiter=',',
@@ -127,7 +129,8 @@ class Main(object):
                                                       stoch_osc,
                                                       rsi_class,
                                                       custom_one_class,
-                                                      awesome_oscillator_class)
+                                                      awesome_oscillator_class,
+                                                      custom_two_class)
         # Starts the recognition on the pattern and the live data from the api in the class
         return _recognition.start()
 

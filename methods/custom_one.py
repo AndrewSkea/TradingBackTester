@@ -8,8 +8,8 @@ class CustomOne:
     def __init__(self, constants):
         self._all_data = []
         self.constants = constants
-        self._ema_a = ema.EMA(list(self._all_data), 25)
-        self._ema_b = ema.EMA(list(self._all_data), 18)
+        self._ema_a = ema.EMA(25)
+        self._ema_b = ema.EMA(18)
         self._sma_a = sma.SMA(3)
         self._wma = wma.WMA(7)
         self._awesome_oscillator = awesome_oscillator.AwesomeOscillator(self.constants)

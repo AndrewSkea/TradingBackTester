@@ -31,6 +31,7 @@ class Position(Enum):
     ABOVE = 0
     BELOW = 1
     EQUAL = 2
+    BETWEEN = 3
 
 
 class Indicators(Enum):
@@ -46,3 +47,4 @@ class Indicators(Enum):
     RSI = 9
     STOCHOSC = 10
     TYPRI = 11
+    CUST_2 = 12

@@ -11,8 +11,8 @@ class MACD:
         self._macd_array = []
         self._signal_array = []
         self._multiplier = float(2) / float((self.constants.get_signal_period() + 1))
-        self._ema_a = ema.EMA(self._all_data, self.constants.get_ema_a_period())
-        self._ema_b = ema.EMA(self._all_data, self.constants.get_ema_b_period())
+        self._ema_a = ema.EMA(self.constants.get_ema_a_period())
+        self._ema_b = ema.EMA(self.constants.get_ema_b_period())
         self._crossover_array = []
         self._is_new_value = False
         self._position = Position.EQUAL
