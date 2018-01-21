@@ -4,7 +4,7 @@ import matplotlib.animation as animation
 
 class LiveGraph:
     def __init__(self):
-        self.lenOfPattern = 50
+        self.lenOfPattern = 200
         self.xValues = list(range(1, self.lenOfPattern, 1))
         self.yValues1 = None
         self.yValues2 = None
@@ -30,7 +30,7 @@ class LiveGraph:
             self.ax1.plot(self.xValues, self.close_points, c='r')
         except:
             print("Not enough patterns")
-        self.fig.suptitle(self._title)
+        self.fig.suptitle("Close: {} Close+5: {}".format(self._title, self.future_close_point))
 
     def start(self, pattern1, pattern2=None, pattern3=None, pattern4=None, close_points=None, future_close_point=None,
               title_text="Default"):

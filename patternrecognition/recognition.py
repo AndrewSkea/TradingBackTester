@@ -11,7 +11,7 @@ import sys
 class PatternRecognition:
     def __init__(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price,
                  _patterns_array_tuple, constants_class, macd_class, cci_class, bband_class, stoch_osc, rsi_class,
-                 custom_one_class, awesome_oscillator_class):
+                 custom_one_class, awesome_oscillator_class, custom_two_class):
         """
         :param pattern_array:
         :param performance_array:
@@ -58,6 +58,8 @@ class PatternRecognition:
         self._pc = PercentageChange(self.constants, self._pattern_array, self._performance_array)
         # CCI Class
         self._cci = cci_class
+        # Custom 2 Class
+        self._custom_two = custom_two_class
         # BBand class Class
         self._bband = bband_class
         # THis is the Stochastic Oscillator classs
@@ -76,22 +78,23 @@ class PatternRecognition:
         self._bought_won = 0
         self._sold_failed = 0
         self._sold_won = 0
-        self._index_of_graph_needed = -5
+        self._index_of_graph_needed = -10
         self._index_of_graph = 0
 
     def send_results_to_graph(self, future_close_val, title):
         if self._index_of_graph == self._index_of_graph_needed:
-            self._bband.send_results_to_graph(self._graph, future_close_val, title)
+            self._custom_two.send_results_to_graph(self._graph, future_close_val, title)
         self._index_of_graph += 1
 
     def add_to_indicators(self, close_value, low_value, high_value):
-        self._macd.add_data_point(close_value)
-        self._cci.add_to_cci_array(close_value, high_value, low_value)
-        self._bband.add_to_arrays(close_value)
-        self._stoch_osc.add_to_stoch(high_value, low_value, close_value)
-        self._rsi.add_point(close_value)
-        self._custom_one_class.add_data_point(close_value, low_value, high_value)
-        self._awesome_oscillator_class.add_data_point(low_value, high_value)
+        # self._macd.add_data_point(close_value)
+        # self._cci.add_to_cci_array(close_value, high_value, low_value)
+        # self._bband.add_to_arrays(close_value)
+        # self._stoch_osc.add_to_stoch(high_value, low_value, close_value)
+        # self._rsi.add_point(close_value)
+        # self._custom_one_class.add_data_point(close_value, low_value, high_value)
+        # self._awesome_oscillator_class.add_data_point(low_value, high_value)
+        self._custom_two.add_data_point(close_value, low_value, high_value)
 
     def recognition(self, pattern, close_value, low_value, high_value, future_close_value):
         """
@@ -105,31 +108,32 @@ class PatternRecognition:
         """
         self.add_to_indicators(close_value, low_value, high_value)
         result_dict = {
-            Indicators.RSI:         self._rsi.get_result(),
-            Indicators.MACD:        self._macd.get_result(),
-            Indicators.CCI:         self._cci.get_result(),
-            Indicators.BBAND:       self._bband.get_result(),
-            Indicators.STOCHOSC:    self._stoch_osc.get_result(),
-            Indicators.CUST_1:      self._custom_one_class.get_result(),
-            Indicators.AO:          self._awesome_oscillator_class.get_result()
+            # Indicators.RSI:         self._rsi.get_result(),
+            # Indicators.MACD:        self._macd.get_result(),
+            # Indicators.CCI:         self._cci.get_result(),
+            # Indicators.BBAND:       self._bband.get_result(),
+            # Indicators.STOCHOSC:    self._stoch_osc.get_result(),
+            # Indicators.CUST_1:      self._custom_one_class.get_result(),
+            # Indicators.AO:          self._awesome_oscillator_class.get_result(),
+            Indicators.CUST_2:       self._custom_two.get_result()
         }
 
-        indicator_1_val = result_dict[Indicators.CUST_1]
-        indicator_2_val = result_dict[Indicators.CUST_1]
+        indicator_1_val = result_dict[Indicators.CUST_2]
+        indicator_2_val = result_dict[Indicators.CUST_2]
 
         if indicator_1_val == Option.BUY and indicator_2_val == Option.BUY:
             if close_value < future_close_value:
                 self._bought_won += 1
             else:
                 self._bought_failed += 1
-                self.send_results_to_graph(future_close_value, "BOUGHT FAILED")
+                self.send_results_to_graph(future_close_value, "BOUGHT FAIL "+str(close_value))
 
         elif indicator_1_val == Option.SELL and indicator_2_val == Option.SELL:
             if close_value > future_close_value:
                 self._sold_won += 1
             else:
                 self._sold_failed += 1
-                self.send_results_to_graph(future_close_value, "SOLD FAILED")
+                self.send_results_to_graph(future_close_value, "SOLD FAIL "+str(close_value))
 
     def start(self):
         """
@@ -139,10 +143,10 @@ class PatternRecognition:
         """
         num_iterations = len(self._close)
         index = 3
-        self.add_to_indicators(close_value=self._close[0], low_value=self._low[0], high_value=self._high[0])
-        self.add_to_indicators(close_value=self._close[1], low_value=self._low[1], high_value=self._high[1])
-        self.add_to_indicators(close_value=self._close[2], low_value=self._low[2], high_value=self._high[2])
-        while index + 3 < num_iterations:
+        for i in range(index):
+            self.add_to_indicators(close_value=self._close[i], low_value=self._low[i], high_value=self._high[i])
+
+        while index + 5 < num_iterations:
             self._live_close_prices.append(self._close[index])
             self.recognition(None,
                              close_value=self._close[index],
@@ -150,8 +154,8 @@ class PatternRecognition:
                              high_value=self._high[index],
                              future_close_value=self._close[index + 1])
 
-            sys.stdout.write('\r{}/{}'.format(index, num_iterations))
-            sys.stdout.flush()
+            # sys.stdout.write('\r{}/{}'.format(index, num_iterations))
+            # sys.stdout.flush()
             index += 1
 
         total = self._bought_won + self._sold_won + self._bought_failed + self._sold_failed
