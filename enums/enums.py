@@ -48,3 +48,4 @@ class Indicators(Enum):
     STOCHOSC = 10
     TYPRI = 11
     CUST_2 = 12
+    CUST_3 = 13

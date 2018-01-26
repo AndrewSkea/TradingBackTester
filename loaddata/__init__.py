@@ -1,1 +1,2 @@
-from loaddata import loader
+from loaddata.loader import *
+from loaddata.dataset import *

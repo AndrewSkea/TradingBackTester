@@ -11,7 +11,7 @@ import sys
 class PatternRecognition:
     def __init__(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price,
                  _patterns_array_tuple, constants_class, macd_class, cci_class, bband_class, stoch_osc, rsi_class,
-                 custom_one_class, awesome_oscillator_class, custom_two_class):
+                 custom_one_class, awesome_oscillator_class, custom_two_class, custom_three_class):
         """
         :param pattern_array:
         :param performance_array:
@@ -60,6 +60,8 @@ class PatternRecognition:
         self._cci = cci_class
         # Custom 2 Class
         self._custom_two = custom_two_class
+        # Custom 3 class Class
+        self._custom_three = custom_three_class
         # BBand class Class
         self._bband = bband_class
         # THis is the Stochastic Oscillator classs
@@ -94,7 +96,8 @@ class PatternRecognition:
         # self._rsi.add_point(close_value)
         # self._custom_one_class.add_data_point(close_value, low_value, high_value)
         # self._awesome_oscillator_class.add_data_point(low_value, high_value)
-        self._custom_two.add_data_point(close_value, low_value, high_value)
+        # self._custom_two.add_data_point(close_value, low_value, high_value)
+        self._custom_three.add_data_point(close_value, low_value, high_value)
 
     def recognition(self, pattern, close_value, low_value, high_value, future_close_value):
         """
@@ -115,20 +118,21 @@ class PatternRecognition:
             # Indicators.STOCHOSC:    self._stoch_osc.get_result(),
             # Indicators.CUST_1:      self._custom_one_class.get_result(),
             # Indicators.AO:          self._awesome_oscillator_class.get_result(),
-            Indicators.CUST_2:       self._custom_two.get_result()
+            # Indicators.CUST_2:      self._custom_two.get_result()
+            Indicators.CUST_3:        self._custom_three.get_result()
         }
 
-        indicator_1_val = result_dict[Indicators.CUST_2]
-        indicator_2_val = result_dict[Indicators.CUST_2]
+        indicator_1_val = result_dict[Indicators.CUST_3]
+        indicator_2_val = result_dict[Indicators.CUST_3]
 
-        if indicator_1_val == Option.BUY and indicator_2_val == Option.BUY:
+        if indicator_1_val == indicator_2_val == Option.BUY:
             if close_value < future_close_value:
                 self._bought_won += 1
             else:
                 self._bought_failed += 1
                 self.send_results_to_graph(future_close_value, "BOUGHT FAIL "+str(close_value))
 
-        elif indicator_1_val == Option.SELL and indicator_2_val == Option.SELL:
+        elif indicator_1_val == indicator_2_val == Option.SELL:
             if close_value > future_close_value:
                 self._sold_won += 1
             else:
@@ -144,7 +148,8 @@ class PatternRecognition:
         num_iterations = len(self._close)
         index = 3
         for i in range(index):
-            self.add_to_indicators(close_value=self._close[i], low_value=self._low[i], high_value=self._high[i])
+            # self.add_to_indicators(close_value=self._close[i], low_value=self._low[i], high_value=self._high[i])
+            self._custom_three.just_add_data(close_value=self._close[i], low_value=self._low[i], high_value=self._high[i])
 
         while index + 5 < num_iterations:
             self._live_close_prices.append(self._close[index])

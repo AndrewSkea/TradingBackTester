@@ -1,6 +1,3 @@
-import cProfile
-import databases
-import loaddata
 from constants import constants
 from patternrecognition import recognition
 from methods import macd
@@ -8,12 +5,9 @@ from methods import cci
 from methods import bollingerbands
 from methods import stochastic_oscillator
 from methods import rsi
-from methods import custom_one, awesome_oscillator, custom_two
+from methods import custom_one, awesome_oscillator, custom_two, custom_three
 import numpy as np
-import pstats
-from multiprocessing import Pool
-
-from iqoptionapi.api import IQOptionAPI
+from loaddata.loader import Loader
 import time
 
 
@@ -31,50 +25,6 @@ class Main(object):
         self.constants = constants_class
 
     def start(self):
-        """
-        The function starts off all the different branches of the program: db set up, loading data, recognition
-        :return: null
-        """
-        # Starts db instance
-        # _past_data = self.start_db()
-        # Starts the loading of data from the db and passes it into the recognition class
-        # pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price = self.start_loading_data(
-        #      all_data_array=_past_data[0])
-        pattern_array, performance_array, time_ar, open_price, high_price, low_price, close_price, _patterns_array_tuple = [], [], [], [], [], [], [], []
-        # this is the tuple of the arrays of the patterns we will consider 'live' patterns
-        # _patterns_array_tuple = self.start_loading_data(all_data_array=_past_data[1])
-        # Starts the recognition part of the program
-        return self.start_pattern_recognition(pattern_array, performance_array, time_ar, open_price, high_price,
-                                              low_price, close_price, _patterns_array_tuple)
-
-    # def start_db(self):
-    #     """
-    #     This starts all the database connections and sets up the handler for the 2 tables
-    #     :return: Array of all data that will be passed into the dataloader class
-    #     """
-    #     # Creates an instance of the database
-    #     _database = databases.database.Database()
-    #     # Creates an instance of the log handler class
-    #     # self._log_handler = databases.log_handler.LogHandler()
-    #     # Creates an instance of the histdata handler
-    #     _histdata_handler = databases.histdata_handler.HistDBHandler(self.constants)
-    #     # Calls the create database function which in turn makes the tables too
-    #     _database.create_database()
-    #     # Return the full data array
-    #     return _histdata_handler.get_all_pattern_data()
-    #
-    # def start_loading_data(self, all_data_array):
-    #     """
-    #     This starts the loading data class which will process the data
-    #     :param all_data_array:
-    #     :return: the tuple of all the data and performance arrays that will be used by recognition
-    #     """
-    #     # Sets an instance of the data loader that gets all the percentage change arrays
-    #     _loader = loaddata.loader.Loader(all_data_array, self.constants)
-    #     return _loader.pattern_storage()
-
-    def start_pattern_recognition(self, pattern_array, performance_array, time_ar, open_price, high_price, low_price,
-                                  close_price, _patterns_array_tuple):
         """
         Starts the recognition with the tuple of data and performance arrays
         :param _patterns_array_tuple:
@@ -99,14 +49,22 @@ class Main(object):
 
         custom_two_class = custom_two.CustomTwo(self.constants)
 
+        custom_three_class = custom_three.CustomThree(self.constants)
+
         awesome_oscillator_class = awesome_oscillator.AwesomeOscillator(self.constants)
 
         open_price, high_price, low_price, close_price = np.loadtxt('eurusd.csv', unpack=True, delimiter=',',
-                                                                              usecols=(1, 2, 3, 4))
+                                                                    usecols=(1, 2, 3, 4))
 
-        quarter = len(open_price)/4
-        third = len(open_price)/3
-        half = len(open_price)/2
+        # loader = Loader()
+        # loader.load_data(20)
+        # datasets = loader.get_datasets()
+        # print(len(datasets))
+        # time.sleep(4)
+
+        quarter = len(open_price) / 4
+        third = len(open_price) / 3
+        half = len(open_price) / 2
         full = len(open_price)
         used = third
 
@@ -116,12 +74,14 @@ class Main(object):
         close_price = close_price[-used:]
 
         # Creates recognition class instance
-        _recognition = recognition.PatternRecognition(list(pattern_array),
-                                                      list(performance_array),
-                                                      list(time_ar), list(open_price),
-                                                      list(high_price), list(low_price),
+        _recognition = recognition.PatternRecognition([],
+                                                      [],
+                                                      [],
+                                                      list(open_price),
+                                                      list(high_price),
+                                                      list(low_price),
                                                       list(close_price),
-                                                      list(_patterns_array_tuple),
+                                                      [],
                                                       self.constants,
                                                       macd_class,
                                                       cci_class,
@@ -130,7 +90,8 @@ class Main(object):
                                                       rsi_class,
                                                       custom_one_class,
                                                       awesome_oscillator_class,
-                                                      custom_two_class)
+                                                      custom_two_class,
+                                                      custom_three_class)
         # Starts the recognition on the pattern and the live data from the api in the class
         return _recognition.start()
 
