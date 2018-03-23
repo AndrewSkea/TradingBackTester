@@ -39,6 +39,9 @@ class StochasticOscillator:
         except ZeroDivisionError:
             print("Dividing by zero")
 
+    def get_stoch_osc_result_for_nn(self):
+        return self._stoch_osc_array[-1]
+
     def get_result(self):
         try:
             result_array = []

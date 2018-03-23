@@ -1,5 +1,6 @@
 from enums.enums import Option
-from methods import ema, sma
+from indicators import sma
+from methods import ema
 
 
 class CustomThree:
@@ -27,6 +28,8 @@ class CustomThree:
         self._bearish = False
         self._bullish = False
 
+        self._signal = []
+
         self._highest_of_last_period = 0
         self._lowest_of_last_period = 0
 
@@ -46,7 +49,7 @@ class CustomThree:
         self._close_prices.append(close_value)
         self._high_prices.append(high_value)
         self._low_prices.append(low_value)
-        print("HI")
+        self._sma_a.add_data_point(close_value)
 
     def add_data_point(self, close_value, low_value, high_value):
         self._close_prices.append(close_value)
@@ -57,8 +60,8 @@ class CustomThree:
         self._highest_of_last_period = max(self._close_prices[-13:])
         self._lowest_of_last_period = min(self._close_prices[-13:])
 
-        self._bearish = True if self._close_prices[-1] > self._sma_a.get_sma_array()[-1] else False
-        self._bullish = True if self._close_prices[-1] < self._sma_a.get_sma_array()[-1] else False
+        self._bearish = True if self._close_prices[-1] > self._sma_a.get_sma_array()[-1] and self._close_prices[-2] < self._sma_a.get_sma_array()[-2] else False
+        self._bullish = True if self._close_prices[-1] < self._sma_a.get_sma_array()[-1] and self._close_prices[-2] > self._sma_a.get_sma_array()[-2] else False
 
         self._ema_a.add_data_point(close_value)
 
@@ -74,9 +77,16 @@ class CustomThree:
         ema_f = self._ema_f.add_data_point(ema_e)
         dema = 2 * ema_e - ema_f
 
-        # signal = max(ema_fast, ema_slow) if tema > dema else min(ema_fast, ema_slow)
-        # is_call = tema > dema and signal > low_value and (signal - signal[1] > signal[1] - signal[2])
-        # is_put = tema < dema and signal < high_value and (signal[1] - signal > signal[2] - signal[1])
+        # self._signal.append(max(ema_fast, ema_slow) if tema > dema else min(ema_fast, ema_slow))
+        # is_call = tema > dema and self._signal[-1] > low_value and (self._signal[-1] - self._signal[-2] > self._signal[-2] - self._signal[-3])
+        # is_put = tema < dema and self._signal[-1] < high_value and (self._signal[-2] - self._signal[-1] > self._signal[-3] - self._signal[-2])
+
+        # if is_call:
+        #     self._result_array.append(Option.BUY)
+        # elif is_put:
+        #     self._result_array.append(Option.SELL)
+        # else:
+        #     self._result_array.append(Option.NO_TRADE)
 
         self._up_array.append((high_value + low_value) / 2 - (1 * self.average_true_range()))
         self._down_array.append((high_value + low_value) / 2 + (1 * self.average_true_range()))
@@ -103,7 +113,7 @@ class CustomThree:
             else:
                 if self._close_prices[-1] < self._trend_up_array[-2]:
                     temp = -1
-                else:
+                elif len(self._trend) > 1:
                     if self._trend[-1] is None:
                         temp = 0
                     else:

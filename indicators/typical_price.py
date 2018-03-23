@@ -1,19 +1,21 @@
-from methods.sma import SMA
+from indicators.sma import SMA
+from functions.mean_deviation import calculate_mean_deviation
+
 
 class TypicalPrice:
-    def __init__(self, high_price, low_price, close_price, constants_class):
+    def __init__(self, constants_class):
         # This is the global constants class
         self._constants = constants_class
         # This is the typical price array
         self._typical_price_array = []
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._high = list(high_price)
+        self._high = []
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._low = list(low_price)
+        self._low = []
         # This is the sell performance array which is the pattern's outcome (same index as pattern)
-        self._close = list(close_price)
+        self._close = []
         # This is the SMA class - This isn't set yet because we are passing in the data as a parameter to the class
-        self._sma_class = SMA(14)
+        self._sma_class = SMA(20)
         # This is the sma of the Typical Price
         self._sma_of_tp = []
         # This is the standard deviation array
@@ -50,23 +52,11 @@ class TypicalPrice:
     def calculate_initial_md_array(self):
         for i in range(len(self._sma_of_tp)):
             self._mean_deviation_array.append(
-                self.calculate_mean_deviation(self._typical_price_array[i:i + self._sma_period], self._sma_of_tp[i]))
-
-    def calculate_mean_deviation(self, lst, sma_point):
-        temp_num = 0
-        for j in lst:
-            temp_num += abs(sma_point - j)
-        temp_num /= len(lst)
-        if temp_num == 0:
-            temp_num = 0.0000000001
-        return temp_num
+                calculate_mean_deviation(self._typical_price_array[i:i + self._sma_period], self._sma_of_tp[i]))
 
     def add_to_mean_deviation_array(self):
         self._mean_deviation_array.append(
-            self.calculate_mean_deviation(self._typical_price_array[-self._sma_period:], self._sma_of_tp[-1]))
+            calculate_mean_deviation(self._typical_price_array[-self._sma_period:], self._sma_of_tp[-1]))
 
     def get_standard_deviation_array_for_tp(self):
         return self._mean_deviation_array
-
-
-

@@ -1,5 +1,6 @@
 from enums.enums import Option
-from methods import ema, sma
+from indicators import sma
+from methods import ema
 
 
 class CustomTwo:

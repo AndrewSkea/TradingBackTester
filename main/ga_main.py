@@ -1,14 +1,14 @@
-from constants.constants import Constants
+import multiprocessing
 from random import randint, uniform, randrange
-import cProfile
+
 import databases
 import loaddata
-from patternrecognition import recognition
-from methods import macd
-from methods import cci
+from constants.constants import Constants
+from indicators import macd
 from methods import bollingerbands
+from methods import cci
 from methods import stochastic_oscillator
-import multiprocessing
+from patternrecognition import recognition
 
 
 class GeneticAlgorithm:

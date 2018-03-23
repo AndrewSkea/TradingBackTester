@@ -1,4 +1,4 @@
-from iqoptionapi.api import IQOptionAPI
+# from iqoptionapi.api import IQOptionAPI
 import time
 
 
