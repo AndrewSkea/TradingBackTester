@@ -32,6 +32,10 @@ class Position(Enum):
     BELOW = 1
     EQUAL = 2
     BETWEEN = 3
+    JUST_GONE_ABOVE = 4
+    JUST_GONE_BELOW = 5
+    JUST_REENTERED_FROM_ABOVE = 6
+    JUST_REENTERED_FROM_BELOW = 7
 
 
 class Indicators(Enum):
@@ -48,3 +52,5 @@ class Indicators(Enum):
     STOCHOSC = 10
     TYPRI = 11
     CUST_2 = 12
+    CUST_3 = 13
+    CUST_4 = 14

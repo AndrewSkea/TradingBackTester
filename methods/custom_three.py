@@ -1,123 +1,155 @@
-# from enums.enums import Position, Trend, Option
-# from methods import ema, wma, awesome_oscillator, sma
-# from graph.graph import LiveGraph
-# import time
-#
-#
-# class CustomOne:
-#     def __init__(self, constants):
-#         self._close_data = []
-#         self._high_data = []
-#         self._low_data = []
-#         self.constants = constants
-#         self._highest_for_period = 0 # For the last 13 bars
-#         self._lowest_for_period = 0  # For the last 13 bars
-#         self._sma_a = sma.SMA(8)
-#         self._crossover_array = []
-#
-#         self._ema_b = ema.EMA(18)
-#         self._sma_a = sma.SMA(3)
-#         self._wma = wma.WMA(7)
-#         self._awesome_oscillator = awesome_oscillator.AwesomeOscillator(self.constants)
-#         self._last_status = Position.EQUAL
-#         self._result_array = []
-#         self._awe_osc_result_array = []
-#
-#     def add_point(self, close, highest, lowest):
-#         self._close_data.append(close)
-#         self._high_data.append(highest)
-#         self._low_data.append(lowest)
-#         try:
-#             self._highest_for_period = max(self._close_data[-13:])
-#             self._lowest_for_period = min(self._close_data[-13:])
-#         except IndexError:
-#             print("Can't do highest/lowest before 13 points of data")
-#
-#         if self._close_data[-1] > self._sma_a.get_sma_array()[-1] and self._close_data[-2] < self._sma_a.get_sma_array()[-2]:
-#             self._crossover_array.append(Position.ABOVE)
-#         elif self._close_data[-1] < self._sma_a.get_sma_array()[-1] and self._close_data[-2] > self._sma_a.get_sma_array()[-2]:
-#             self._crossover_array.append(Position.BELOW)
-#         else:
-#             self._crossover_array.append(Position.EQUAL)
-#
-#         bearish =
-#
-#     study("Vdub Binary Options SniperVX  v1", overlay=true, shorttitle="Vdub_SniperBX_v1")
-#     //
-#     //= == == == == == == == == == =channel == == == == == == == == == == ==
-#     len = input(8, minval=1)
-#     src = input(close, title="Source")
-#     out = sma(src, len)
-#     last8h = highest(close, 13)
-#     lastl8 = lowest(close, 13)
-#     bearish = cross(close, out) == 1 and close[1] > close
-#     bullish = cross(close, out) == 1 and close[1] < close
-#     channel2 = input(false, title="Bar Channel On/Off")
-#     ul2 = plot(channel2?last8h: last8h == nz(last8h[
-#                                                  1])?last8h: na, color = black, linewidth = 1, style = linebr, title = "Candle body resistance level top", offset = 0)
-#     ll2 = plot(channel2?lastl8: lastl8 == nz(lastl8[
-#                                                  1])?lastl8: na, color = black, linewidth = 1, style = linebr, title = "Candle body resistance level bottom", offset = 0)
-#
-#     src0 = close, len0 = input(13, minval=1, title="Trend Change EMA")
-#     ema0 = ema(src0, len0)
-#     plot_color = ema0 >= ema0[2]  ? lime: ema0 < ema0[2] ? red: na
-#     plot(ema0, title="EMA", style=line, linewidth=1, color=plot_color)
-#
-#     slow = 8
-#     fast = 5
-#     vh1 = ema(highest(avg(low, close), fast), 5)
-#     vl1 = ema(lowest(avg(high, close), slow), 8)
-#     //
-#     e_ema1 = ema(close, 1)
-#     e_ema2 = ema(e_ema1, 1)
-#     e_ema3 = ema(e_ema2, 1)
-#     tema = 1 * (e_ema1 - e_ema2) + e_ema3
-#     //
-#     e_e1 = ema(close, 8)
-#     e_e2 = ema(e_e1, 5)
-#     dema = 2 * e_e1 - e_e2
-#     signal = tema > dema ? max(vh1, vl1): min(vh1, vl1)
-#     is_call = tema > dema and signal > low and (signal - signal[1] > signal[1] - signal[2])
-#     is_put = tema < dema and signal < high and (signal[1] - signal > signal[2] - signal[1])
-#
-#     plotshape(
-#         is_call ? 1: na, title = "BUY ARROW", color = green, text = "*BUY*", style = shape.arrowup, location = location.belowbar)
-#     plotshape(is_put ? -1: na, title = "SELL ARROW", color = red, text = "*SELL*", style = shape.arrowdown)
-#     //
-#     // Modified - Rajandran
-#     R
-#     Supertrend - ---------------------------------------------------- // Signal
-#     2
-#     Factor = input(1, minval=1, maxval=000, title="Trend Transition Signal")
-#     Pd = input(1, minval=1, maxval=100)
-#     Up = hl2 - (Factor * atr(Pd))
-#     Dn = hl2 + (Factor * atr(Pd))
-#     TrendUp = close[1] > TrendUp[1]? max(Up, TrendUp[1]): Up
-#     TrendDown = close[1] < TrendDown[1]? min(Dn, TrendDown[1]): Dn
-#     Trend = close > TrendDown[1] ? 1: close < TrendUp[1]? -1: nz(Trend[1], 0)
-#
-#     plotarrow(Trend == 1 and Trend[
-#         1] == -1 ? Trend: na, title = "Up Entry Arrow", colorup = lime, maxheight = 1000, minheight = 50, transp = 85)
-#     plotarrow(Trend == -1 and Trend[
-#         1] == 1 ? Trend: na, title = "Down Entry Arrow", colordown = red, maxheight = 1000, minheight = 50, transp = 85)
-#     // Moddified[RS]
-#     Support and Resistance
-#     V0
-#     RST = input(title='Support / Resistance length:', type=integer, defval=21)
-#     RSTT = valuewhen(high >= highest(high, RST), high, 0)
-#     RSTB = valuewhen(low <= lowest(low, RST), low, 0)
-#     RT2 = plot(RSTT, color=RSTT != RSTT[1] ? na: red, linewidth = 1, offset = 0)
-#     RB2 = plot(RSTB, color=RSTB != RSTB[1] ? na: green, linewidth = 1, offset = 0)
-#     //
-#     //= == == == == == == == == == == == == == == == Directional
-#     Projection == == == == == == == == == == == == == == == == == == == = //
-#     tf2 = input('1', title="Trend Projection TF / Mins/D/W")
-#     M2 = input('ATR')
-#     P2 = input(13.00, type=float)
-#     W2 = input(1)
-#     pf2 = pointfigure(tickerid, 'close', M2, P2, W2)
-#     spfc2 = security(pf2, tf2, close)
-#     channel3 = input(false, title="Connect Projection High/Low")
-#     p22 = plot(channel3?spfc2: spfc2 == nz(
-#         spfc2[1])?spfc2: na, color = blue, linewidth = 2, style = linebr, title = "Directional Projection", offset = 0)
-#     // ---------------------------------------------------------------------- //
+from enums.enums import Option
+from indicators import sma
+from methods import ema
+
+
+class CustomThree:
+    def __init__(self, constants):
+        self._close_prices = []
+        self._high_prices = []
+        self._low_prices = []
+        self.constants = constants
+
+        self._ema_a = ema.EMA(13)
+
+        self._ema_b = ema.EMA(1)
+        self._ema_c = ema.EMA(1)
+        self._ema_d = ema.EMA(1)
+
+        self._ema_e = ema.EMA(8)
+        self._ema_f = ema.EMA(5)
+
+        self._ema_slow = ema.EMA(8)
+        self._ema_fast = ema.EMA(5)
+
+        self._sma_a = sma.SMA(8)
+        self._sma_b = sma.SMA(13)
+
+        self._bearish = False
+        self._bullish = False
+
+        self._signal = []
+
+        self._highest_of_last_period = 0
+        self._lowest_of_last_period = 0
+
+        self._trend_up_array = []
+        self._trend_down_array = []
+        self._down_array = []
+        self._up_array = []
+        self._trend = []
+
+        self._RSTT = []
+        self._RSTB = []
+        self._RST = 21
+
+        self._result_array = []
+
+    def just_add_data(self, close_value, low_value, high_value):
+        self._close_prices.append(close_value)
+        self._high_prices.append(high_value)
+        self._low_prices.append(low_value)
+        self._sma_a.add_data_point(close_value)
+
+    def add_data_point(self, close_value, low_value, high_value):
+        self._close_prices.append(close_value)
+        self._high_prices.append(high_value)
+        self._low_prices.append(low_value)
+
+        self._sma_a.add_data_point(close_value)
+        self._highest_of_last_period = max(self._close_prices[-13:])
+        self._lowest_of_last_period = min(self._close_prices[-13:])
+
+        self._bearish = True if self._close_prices[-1] > self._sma_a.get_sma_array()[-1] and self._close_prices[-2] < self._sma_a.get_sma_array()[-2] else False
+        self._bullish = True if self._close_prices[-1] < self._sma_a.get_sma_array()[-1] and self._close_prices[-2] > self._sma_a.get_sma_array()[-2] else False
+
+        self._ema_a.add_data_point(close_value)
+
+        ema_fast = self._ema_fast.add_data_point(max((low_value + close_value) / 2, 5))
+        ema_slow = self._ema_slow.add_data_point(min((high_value + close_value) / 2, 8))
+
+        ema_b = self._ema_b.add_data_point(close_value)
+        ema_c = self._ema_c.add_data_point(ema_b)
+        ema_d = self._ema_d.add_data_point(ema_c)
+        tema = 1 * (ema_b - ema_c) + ema_d
+
+        ema_e = self._ema_e.add_data_point(close_value)
+        ema_f = self._ema_f.add_data_point(ema_e)
+        dema = 2 * ema_e - ema_f
+
+        # self._signal.append(max(ema_fast, ema_slow) if tema > dema else min(ema_fast, ema_slow))
+        # is_call = tema > dema and self._signal[-1] > low_value and (self._signal[-1] - self._signal[-2] > self._signal[-2] - self._signal[-3])
+        # is_put = tema < dema and self._signal[-1] < high_value and (self._signal[-2] - self._signal[-1] > self._signal[-3] - self._signal[-2])
+
+        # if is_call:
+        #     self._result_array.append(Option.BUY)
+        # elif is_put:
+        #     self._result_array.append(Option.SELL)
+        # else:
+        #     self._result_array.append(Option.NO_TRADE)
+
+        self._up_array.append((high_value + low_value) / 2 - (1 * self.average_true_range()))
+        self._down_array.append((high_value + low_value) / 2 + (1 * self.average_true_range()))
+
+        if len(self._trend_up_array) <= 2:
+            self._trend_up_array.append(self._up_array[-1])
+        else:
+            self._trend_up_array.append(
+                max(self._up_array[-1], self._trend_up_array[-1]) if self._close_prices[-2] > self._trend_up_array[
+                    -2] else
+                self._up_array[-1])
+        if len(self._trend_down_array) <= 2:
+            self._trend_down_array.append(self._down_array[-1])
+        else:
+            self._trend_down_array.append(
+                min(self._down_array[-1], self._trend_down_array[-1]) if self._close_prices[-2] <
+                                                                         self._trend_down_array[-2]
+                else self._down_array[-1])
+
+        if len(self._trend_down_array) > 2:
+            temp = 0
+            if self._close_prices[-1] > self._trend_down_array[-2]:
+                temp = 1
+            else:
+                if self._close_prices[-1] < self._trend_up_array[-2]:
+                    temp = -1
+                elif len(self._trend) > 1:
+                    if self._trend[-1] is None:
+                        temp = 0
+                    else:
+                        temp = self._trend[-1]
+            self._trend.append(temp)
+
+            # self._RSTT.append(self.get_last_highest_value(self._RST))
+            # self._RSTB.append(self.get_last_lowest_value(self._RST))
+            if len(self._trend) > 2:
+                if self._trend[-1] == 1 and self._trend[-2] == -1:
+                    self._result_array.append(Option.BUY)
+                elif self._trend[-1] == -1 and self._trend[-2] == 1:
+                    self._result_array.append(Option.SELL)
+                else:
+                    self._result_array.append(Option.NO_TRADE)
+            else:
+                self._result_array.append(Option.NO_TRADE)
+        else:
+            self._result_array.append(Option.NO_TRADE)
+
+    def get_last_highest_value(self, bars_back):
+        for i in range(bars_back):
+            if self._high_prices[-1] >= self._high_prices[-i]:
+                return self._high_prices[-i]
+        return self._high_prices[-bars_back]
+
+    def get_last_lowest_value(self, bars_back):
+        for i in range(bars_back):
+            if self._low_prices[-1] <= self._low_prices[-i]:
+                return self._low_prices[-i]
+        return self._low_prices[-bars_back]
+
+    def average_true_range(self):
+        return max((self._high_prices[-1] - self._low_prices[-1]),
+                   abs(self._high_prices[-1] - self._close_prices[-2]),
+                   abs(self._low_prices[-1] - self._close_prices[-2]))
+
+    def get_result(self):
+        return self._result_array[-1]

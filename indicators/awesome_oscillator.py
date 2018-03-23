@@ -1,5 +1,5 @@
 from enums.enums import Position, Option
-from methods import sma
+from indicators import sma
 
 
 class AwesomeOscillator:
@@ -18,6 +18,9 @@ class AwesomeOscillator:
 
     def get_awesome_oscillator_array(self):
         return self._awesome_oscillator
+
+    def get_awesome_oscillator_result_for_nn(self):
+        return self._awesome_oscillator[-1]
 
     def get_result(self):
         """

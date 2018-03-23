@@ -1,12 +1,11 @@
 from enums.enums import Position, Trend, Option
-from methods import ema
-import functools
+from indicators import ema
 
 
 class MACD:
 
-    def __init__(self, all_close_data, constants):
-        self._all_data = list(all_close_data)
+    def __init__(self, constants):
+        self._all_data = []
         self.constants = constants
         self._macd_array = []
         self._signal_array = []
@@ -64,19 +63,20 @@ class MACD:
             if self._is_new_value:
                 self._is_new_value = False
                 if self._crossover_array[-1] == Trend.UP and self._macd_array[-1] > self._macd_array[-2]:
-                        #> self._macd_array[-3] > self._macd_array[-4] > self._macd_array[-5] > self._macd_array[-6]:
                     option = Option.BUY
                 elif self._crossover_array[-1] == Trend.DOWN and self._macd_array[-1] < self._macd_array[-2]:
-                        #< self._macd_array[-3] < self._macd_array[-4] < self._macd_array[-5] < self._macd_array[-6]:
                     option = Option.SELL
                 else:
                     option = Option.NO_TRADE
                 return option
             else:
                 self._is_new_value = False
-                return None
+                return Option.NO_TRADE
         except IndexError:
-            return None
+            return Option.NO_TRADE
+
+    def get_result_for_nn(self):
+        return self.get_result().value
 
 
 

@@ -1,7 +1,6 @@
-from enums.enums import Position, Trend, Option
-from methods import ema, wma, awesome_oscillator, sma
-from graph.graph import LiveGraph
-import time
+from enums.enums import Position, Option
+from indicators import sma
+from methods import ema, wma, awesome_oscillator
 
 
 class CustomOne:
