@@ -13,7 +13,7 @@ class CustomFour:
         self.constants = const
         self._rsi_class = rsi.RSI(self._data)
         self._cci_class = cci.CCI(self._data)
-        self._bband_class = bollingerbands.BollingerBands(self._data)
+        # self._bband_class = bollingerbands.BollingerBands(self._data)
         self._num = 0
         self._result_table = [
             ['High', 'Low', 'Close', 'CCI', 'TP', 'TP_SMA', 'MeanDev', 'BBAND_L', 'BBAND_M', 'BBAND_U', 'RSI']]
@@ -21,11 +21,9 @@ class CustomFour:
         # self._file = open('/testing/eurusd_final_results_output.csv', 'a')
 
     def update_data_arrays(self):
-        # self._rsi_class.update_data_arrays()
+        self._rsi_class.update_data_arrays()
         self._cci_class.update_data_arrays()
         # self._bband_class.update_data_arrays()
-        # if len(self._data.close) > 100:
-        #     self.add_to_table_print()
 
     def add_to_table_print(self):
         self._result_table.append([
@@ -42,13 +40,17 @@ class CustomFour:
             self._rsi_class.rsi[-1]
         ])
 
-    def print_final_table(self):
-        print(terminaltables.AsciiTable(self._result_table).table)
-
     def get_result(self):
-        if self._cci_class.has_broken_out() == Position.JUST_GONE_ABOVE:
+        if self._cci_class.has_broken_out() == Position.JUST_GONE_ABOVE or self._rsi_class.has_broken_out() == Position.JUST_GONE_ABOVE:
             return Option.SELL
-        elif self._cci_class.has_broken_out() == Position.JUST_GONE_BELOW:
+        elif self._cci_class.has_broken_out() == Position.JUST_GONE_BELOW or self._rsi_class.has_broken_out() == Position.JUST_GONE_BELOW:
             return Option.BUY
         else:
             return Option.NO_TRADE
+
+        # if self._rsi_class.has_broken_out() == Position.JUST_GONE_ABOVE:
+        #     return Option.SELL
+        # elif self._rsi_class.has_broken_out() == Position.JUST_GONE_BELOW:
+        #     return Option.BUY
+        # else:
+        #     return Option.NO_TRADE

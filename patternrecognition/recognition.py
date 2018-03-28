@@ -8,10 +8,9 @@ from graph.graph import LiveGraph
 from constants import finalconstants as const
 
 
-#https://blog.altoros.com/tensorflow-for-foreign-exchange-market-analyzing-time-series-data.html
+# https://blog.altoros.com/tensorflow-for-foreign-exchange-market-analyzing-time-series-data.html
 
 class PatternRecognition:
-
     def __init__(self, data_array_class, time_ar, open_price, high_price, low_price, close_price):
 
         self.data = data_array_class
@@ -21,7 +20,7 @@ class PatternRecognition:
         self._close = close_price
         self._open = open_price
 
-        self.method = C4.CustomFour(data_array_class)
+        self.method = C4.CustomFour(self.data)
 
         self._graph = LiveGraph()
         self._bought_failed = 0
@@ -105,7 +104,26 @@ class PatternRecognition:
         running the recognition every minute from then on in order to trade
         :return:
         """
-        # file = open('/databases/eurusd_cci.csv', 'a')
+        with open('logdata/cci_test.txt', 'a') as log_file:
+            log_file.write("{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format("CCI Lower", "CCI Upper", "CCI Period",
+                                                                           "Bought Won", "Bought Failed",
+                                                                           "Sold Won", "Sold Failed",
+                                                                           "Total Won", "Total Lost",
+                                                                           "Bought %", "Sold %", "Total %", "Total £"))
+        # total_iteration = 0
+        # max_money = 0
+        # for period in range(14, 22, 1):
+        #     for upper in range(140, 240, 10):
+        #         for lower in range(130, 200, 10):
+        #             self._bought_won = 0
+        # self._sold_won = 0
+        # self._bought_failed = 0
+        # self._sold_failed = 0
+        # const.cci_upper_limit = upper
+        # const.cci_lower_limit = lower
+        # const.cci_period = period
+        # self.method = C4.CustomFour(self.data)
+        # total_iteration += 1
         start_time = time.time()
         num_iterations = len(self._close)
         for index in range(num_iterations - 1):
@@ -121,20 +139,35 @@ class PatternRecognition:
 
         total = self._bought_won + self._sold_won + self._bought_failed + self._sold_failed
         num_won = self._bought_won + self._sold_won
+        num_lost = self._bought_failed + self._sold_failed
         per_win = int((100 * num_won / total) if total != 0 else 0)
-        bought_per_win = int(100*self._bought_won/(self._bought_won + self._bought_failed))
-        sold_per_win = int(100*self._sold_won/(self._sold_failed + self._sold_won))
+        bought_per_win = int(100 * self._bought_won / (self._bought_won + self._bought_failed))
+        sold_per_win = int(100 * self._sold_won / (self._sold_failed + self._sold_won))
+
+        final_money = (100 * 0.8 * num_won) - (100 * num_lost)
+        final__money_string = "£{}".format(final_money)
 
         with open('logdata/log.txt', 'a') as log_file:
-            log_str = "\nAfter {}s and {} trades:\n{}".format(int(time.time() - start_time), total, AsciiTable([
-                ["Result", "Bought", "Sold", "Total"],
-                ["Won", self._bought_won, self._sold_won, num_won],
-                ["Failed", self._bought_failed, self._sold_failed, total-num_won],
-                ["Totals", str(bought_per_win) + "%", str(sold_per_win) + "%", str(per_win) + "%"]]).table)
+            log_str = "\nAfter {}s, {} trades and a net profit of {}:\n{}" \
+                .format(int(time.time() - start_time), total, final__money_string,
+                        AsciiTable([
+                            ["Result", "Bought", "Sold", "Total"],
+                            ["Won", self._bought_won, self._sold_won, num_won],
+                            ["Failed", self._bought_failed, self._sold_failed, total - num_won],
+                            ["Totals", str(bought_per_win) + "%", str(sold_per_win) + "%",
+                             str(per_win) + "%"]]).table)
 
             print(log_str)
-            log_file.write("TEST - CCI")
-            log_file.write(const.get_cci_log_values())
-            log_file.write(log_str + "\n\n------------------------------------------------------------------------\n")
+            log_file.write(
+                "{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(const.cci_lower_limit,
+                                                                const.cci_upper_limit,
+                                                                const.cci_period,
+                                                                self._bought_won, self._bought_failed,
+                                                                self._sold_won, self._sold_failed,
+                                                                total, num_won, num_lost,
+                                                                bought_per_win, sold_per_win, per_win,
+                                                                final_money))
 
-
+                    # if final_money > max_money:
+                    #     max_money = final_money
+                    #     print(max_money)

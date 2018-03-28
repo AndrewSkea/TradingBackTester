@@ -21,7 +21,7 @@ class RSI:
             self._can_trade = True
             self.avg_gain_of_close.append(sum(self._data.gain_of_close[-self.period:]) / self.period)
             self.avg_loss_of_close.append(sum(self._data.loss_of_close[-self.period:]) / self.period)
-            self.relative_strength.append(self.avg_gain_of_close[-1] / self.avg_loss_of_close[-1])
+            self.relative_strength.append(self.avg_gain_of_close[-1] / self.avg_loss_of_close[-1] if self.avg_loss_of_close[-1] != 0 else 0)
             self.rsi.append(100-(100/(1+self.relative_strength[-1])) if self.avg_loss_of_close[-1] != 0 else 100)
         else:
             self._can_trade = False

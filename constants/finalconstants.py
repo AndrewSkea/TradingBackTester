@@ -2,14 +2,14 @@ ema_a_period = 14
 ema_b_period = 18
 signal_period = 12
 cci_constant = 0.015
-cci_upper_limit = 240
-cci_lower_limit = 150
-cci_period = 22
+cci_upper_limit = 160
+cci_lower_limit = 130
+cci_period = 15
 bollinger_band_sma_period = 20
 stochastic_oscillator_period = 20
-rsi_period = 20
-rsi_upper_limit = 75
-rsi_lower_limit = 25
+rsi_period = 18
+rsi_upper_limit = 73
+rsi_lower_limit = 21
 bollinger_band_stdev_multiplier = 3.25
 
 
