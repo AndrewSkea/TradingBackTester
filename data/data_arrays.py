@@ -1,4 +1,3 @@
-from statistics import pstdev
 import numpy as np
 
 
@@ -23,8 +22,6 @@ class DataArrays:
         self.close_sma = []
         self.close_ema = []
         self.close_wma = []
-        # TradingTime Boolean
-        self.valid_trading_time = True
 
     def add_data(self, time_value, open_value, high_value, low_value, close_value):
         self.time.append(time_value)
@@ -33,11 +30,6 @@ class DataArrays:
         self.low.append(low_value)
         self.close.append(close_value)
         self.typical_price.append((close_value + high_value + low_value) / 3)
-
-        if self.time[-1].tm_wday <= 4 and 17 <= self.time[-1].tm_hour < 19:
-            self.valid_trading_time = True
-        else:
-            self.valid_trading_time = False
 
         if len(self.close_ema) == 0:
             self.close_ema.append(close_value)

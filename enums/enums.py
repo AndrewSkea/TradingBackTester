@@ -38,6 +38,13 @@ class Position(Enum):
     JUST_REENTERED_FROM_BELOW = 7
 
 
+class Strength(Enum):
+    WEAK = 0
+    MILD = 1
+    STRONG = 2
+    VERY_STRONG = 3
+
+
 class Indicators(Enum):
     SMA = 0
     EMA = 1

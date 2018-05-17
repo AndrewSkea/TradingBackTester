@@ -4,17 +4,24 @@ import numpy as np
 
 
 class RSI:
-    def __init__(self, data_array_class):
+    def __init__(self, data_array_class, period=None, upper_limit=None, lower_limit=None, time_limits=[(17, 19)]):
         self._data = data_array_class
         self._constants = const
-        self.period = const.rsi_period
-        self._upper_limit = const.rsi_upper_limit
-        self._lower_limit = const.rsi_lower_limit
+        self.period = const.rsi_period if period is None else period
+        self._upper_limit = const.rsi_upper_limit if upper_limit is None else upper_limit
+        self._lower_limit = const.rsi_lower_limit if lower_limit is None else lower_limit
+        self._time_limits = time_limits
         self.avg_gain_of_close = []
         self.avg_loss_of_close = []
         self.relative_strength = []
         self.rsi = []
         self._can_trade = False
+        self.valid_trading_time = False
+        print("RSI\t\tperiod: {}, upper: {}, lower: {}, time: {})".
+              format(period, upper_limit, lower_limit, time_limits))
+
+    def is_trading_time(self):
+        return self.valid_trading_time
 
     def update_data_arrays(self):
         if len(self._data.close) >= self.period + 2:
@@ -29,6 +36,8 @@ class RSI:
             self.avg_loss_of_close.append(np.NaN)
             self.relative_strength.append(np.NaN)
             self.rsi.append(np.NaN)
+        self.valid_trading_time = self._data.time[-1].tm_wday <= 4 \
+                                  and any(tup[0] <= self._data.time[-1].tm_hour < tup[1] for tup in self._time_limits)
 
     def has_broken_out(self):
         if self._can_trade:
