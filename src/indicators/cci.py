@@ -1,6 +1,6 @@
-from indicators.indicator import Indicator
-from functions import mean_deviation
-from indicators.sma import SMA
+from .indicator import Indicator
+from ..functions import mean_deviation
+from .sma import SMA
 import numpy as np
 import ast
 

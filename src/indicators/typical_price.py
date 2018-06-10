@@ -1,5 +1,5 @@
-from indicators.sma import SMA
-from functions.mean_deviation import calculate_mean_deviation
+from .sma import SMA
+from ..functions.mean_deviation import calculate_mean_deviation
 
 
 class TypicalPrice:

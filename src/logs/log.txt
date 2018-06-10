@@ -7277,3 +7277,143 @@ Lowest		£93
 | Failed | 19     | 26   | 45    |
 | Totals | 62%    | 51%  | 56%   |
 +--------+--------+------+-------+
+CCI		period: 26, upper: 200, lower: -200, time: [(13, 21)]
+Time		2s
+Trades		104
+Ideal Trades	120
+Profit		£-4
+Linear Profit	£110
+Lowest		£93
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 31     | 28   | 59    |
+| Failed | 19     | 26   | 45    |
+| Totals | 62%    | 51%  | 56%   |
++--------+--------+------+-------+
+CCI		period: 26, upper: 200, lower: -200, time: [(13, 21)]
+Time		1s
+Trades		104
+Ideal Trades	120
+Profit		£-4
+Linear Profit	£110
+Lowest		£93
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 31     | 28   | 59    |
+| Failed | 19     | 26   | 45    |
+| Totals | 62%    | 51%  | 56%   |
++--------+--------+------+-------+
+CCI		period: 26, upper: 200, lower: -200, time: [(13, 21)]
+Time		2s
+Trades		104
+Ideal Trades	120
+Profit		£-4
+Linear Profit	£110
+Lowest		£93
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 31     | 28   | 59    |
+| Failed | 19     | 26   | 45    |
+| Totals | 62%    | 51%  | 56%   |
++--------+--------+------+-------+
+CCI		period: 26, upper: 200, lower: -200, time: [(13, 21)]
+Time		1s
+Trades		93
+Ideal Trades	120
+Profit		£-25
+Linear Profit	£59
+Lowest		£67
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 27     | 23   | 50    |
+| Failed | 20     | 23   | 43    |
+| Totals | 57%    | 50%  | 53%   |
++--------+--------+------+-------+
+CCI		period: 26, upper: 200, lower: -200, time: [(13, 21)]
+Time		1s
+Trades		119
+Ideal Trades	120
+Profit		£17
+Linear Profit	£156
+Lowest		£77
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 32     | 38   | 70    |
+| Failed | 29     | 20   | 49    |
+| Totals | 52%    | 65%  | 58%   |
++--------+--------+------+-------+
+CCI		period: 26, upper: 200, lower: -200, time: [(13, 21)]
+Time		1s
+Trades		125
+Ideal Trades	120
+Profit		£-39
+Linear Profit	£24
+Lowest		£51
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 35     | 31   | 66    |
+| Failed | 30     | 29   | 59    |
+| Totals | 53%    | 51%  | 52%   |
++--------+--------+------+-------+
+CCI		period: 24, upper: 220, lower: -220, time: [(13, 21)]
+Time		16s
+Trades		1081
+Ideal Trades	None
+Profit		£-97
+Linear Profit	£-421
+Lowest		£1
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 297    | 281  | 578   |
+| Failed | 264    | 239  | 503   |
+| Totals | 52%    | 54%  | 53%   |
++--------+--------+------+-------+
+CCI		period: 24, upper: 220, lower: -220, time: [(13, 21)]
+Time		15s
+Trades		1081
+Ideal Trades	None
+Profit		£-97
+Linear Profit	£-421
+Lowest		£1
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 297    | 281  | 578   |
+| Failed | 264    | 239  | 503   |
+| Totals | 52%    | 54%  | 53%   |
++--------+--------+------+-------+
+CCI		period: 24, upper: 220, lower: -220, time: [(13, 21)]
+Time		16s
+Trades		1081
+Ideal Trades	0
+Profit		£-97
+Linear Profit	£-421
+Lowest		£1
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 297    | 281  | 578   |
+| Failed | 264    | 239  | 503   |
+| Totals | 52%    | 54%  | 53%   |
++--------+--------+------+-------+
+CCI		period: 24, upper: 220, lower: -220, time: [(13, 21)]
+Time		16s
+Trades		1081
+Ideal Trades	0
+Profit		£-97
+Linear Profit	£-421
+Lowest		£1
++--------+--------+------+-------+
+| Result | Bought | Sold | Total |
++--------+--------+------+-------+
+| Won    | 297    | 281  | 578   |
+| Failed | 264    | 239  | 503   |
+| Totals | 52%    | 54%  | 53%   |
++--------+--------+------+-------+

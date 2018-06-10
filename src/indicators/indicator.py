@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from logs.print import _print
+from ..logs.print import _print
 
 
 class Indicator:

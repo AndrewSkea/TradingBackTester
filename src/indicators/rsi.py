@@ -1,15 +1,13 @@
-from constants import finalconstants as const
-from enums.enums import Position, Trend
+from ..enums.enums import Position, Trend, Option
 import numpy as np
 
 
 class RSI:
     def __init__(self, data_array_class, period=None, upper_limit=None, lower_limit=None, time_limits=[(17, 19)]):
         self._data = data_array_class
-        self._constants = const
-        self.period = const.rsi_period if period is None else period
-        self._upper_limit = const.rsi_upper_limit if upper_limit is None else upper_limit
-        self._lower_limit = const.rsi_lower_limit if lower_limit is None else lower_limit
+        self.period = period
+        self._upper_limit = upper_limit
+        self._lower_limit = lower_limit
         self._time_limits = time_limits
         self.avg_gain_of_close = []
         self.avg_loss_of_close = []

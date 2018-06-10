@@ -1,5 +1,5 @@
-from enums.enums import Position, Trend, Option
-from indicators import ema
+from ..enums.enums import Position, Trend, Option
+from . import ema
 
 
 class MACD:

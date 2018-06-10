@@ -8,15 +8,5 @@
       "BUY": ["has_broken_below", "has_moved_down_for"],
       "SELL": ["has_broken_above", "has_moved_up_for"]
     }
-  },
-    "cci": {
-    "period": 26,
-    "upper_limit": 200,
-    "lower_limit": 200,
-    "time_limits": "[(13, 21)]",
-    "signals": {
-      "BUY": ["has_broken_below", "has_moved_down_for"],
-      "SELL": ["has_broken_above", "has_moved_up_for"]
-    }
   }
 }

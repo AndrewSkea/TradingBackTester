@@ -1,7 +1,7 @@
 from statistics import pstdev
-from enums.enums import Position, Trend
-from indicators import sma
-from constants import finalconstants as const
+from ..enums.enums import Position, Trend, Strength
+from . import sma
+from ..constants import finalconstants as const
 import numpy as np
 
 

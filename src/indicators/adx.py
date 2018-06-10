@@ -1,4 +1,4 @@
-from enums.enums import Position, Trend, Strength
+from ..enums.enums import Position, Trend, Strength
 
 
 class ADX:

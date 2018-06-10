@@ -1,7 +1,7 @@
 import time
-from methods import method, m7
+from .methods import method, m7
 from terminaltables import AsciiTable
-from enums.enums import Option
+from .enums.enums import Option
 
 
 class PatternRecognition:
@@ -14,7 +14,6 @@ class PatternRecognition:
         self._open = open_price
         self.methods = [method.CustomMethod(data_array_class, method_conf_json)] if \
             method_conf_json is not None else [m7.CustomMethod(data_array_class)]
-        # self.methods = [m7.CustomMethod(data_array_class)]
         self._bought_failed = 0
         self._bought_won = 0
         self._sold_failed = 0
@@ -74,7 +73,7 @@ class PatternRecognition:
             if self._money < 1:
                 print("Broke loop at the {}th minute because you are broke".format(index))
                 break
-        self.log(start_time, num_trades)
+        return self.log(start_time, num_trades)
 
     def log(self, start_time, num_trades):
         try:
@@ -102,5 +101,17 @@ class PatternRecognition:
                          str(per_win) + "%"]]).table)
                 log_file.write(log_str)
                 print(log_str)
+            return {
+                "time": int(time.time() - start_time),
+                "total": total,
+                "num_bought_win": self._bought_won,
+                "num_bought_lost": self._bought_failed,
+                "num_sold_win": self._sold_won,
+                "num_sold_lost": self._sold_failed,
+                "profit": int(self._money - self._starting_money),
+                "linear_profit": int(self._linear__money),
+                "lowest_money": int(self._lowest_money)
+            }
         except ZeroDivisionError:
             print("Divided by zero")
+            return None

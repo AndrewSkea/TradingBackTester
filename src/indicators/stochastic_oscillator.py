@@ -1,4 +1,4 @@
-from enums.enums import Position
+from ..enums.enums import Position
 
 
 class StochasticOscillator:

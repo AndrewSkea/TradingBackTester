@@ -1,5 +1,5 @@
-from enums.enums import Option
-from indicators import cci
+from ..enums.enums import Option
+from ..indicators import cci
 
 
 class CustomMethod:

@@ -1,5 +1,5 @@
-from enums.enums import Position, Option
-from indicators import sma
+from ..enums.enums import Position, Trend, Strength
+from . import sma
 
 
 class AwesomeOscillator:
