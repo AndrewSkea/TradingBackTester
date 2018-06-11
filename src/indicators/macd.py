@@ -1,4 +1,4 @@
-from ..enums.enums import Position, Trend, Option
+from enums.enums import Position, Trend, Option
 from . import ema
 
 

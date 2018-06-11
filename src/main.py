@@ -1,18 +1,26 @@
 import os
-import time
 import random
-from src.data.data_arrays import DataArrays
-from src import backtest
+import time
+import argparse
+
 import pandas as pd
+
+from indicators.data_arrays import DataArrays
+from src.backtest import backtest
 
 
 class Main(object):
-    """
-    Where the main thread of execution begins
-    Initialises the other classes and starts the recognition
-    """
-
     def __init__(self):
+        parser = argparse.ArgumentParser(description='Process fields')
+        parser.add_argument('-js', '--json-str', "json_config_str", type=str, help='json (str) config', default="")
+        args = parser.parse_args()
+        if args.json_config_str != "":
+            self.json_config = args.json_config_str
+        elif os.environ.get('FROM_JSON_FILE'):
+            with open('src/data/config.json', 'r') as file:
+                self.json_config = file.read()
+        else:
+            raise Exception("Need JSON str or Dict parameter for method configuration")
         self._data_class = DataArrays(period=20)
 
     def start(self):
@@ -20,8 +28,7 @@ class Main(object):
         date_ar, time_ar, open_ar, high_ar, low_ar, close_ar = zip(*data_arrays.as_matrix())
         date_time_ar = [time.strptime("{} {}".format(date_ar[i], time_ar[i]), "%m/%d/%Y %H:%M:%S")
                         for i in range(len(date_ar))]
-        assert len(date_time_ar) == len(open_ar) == len(high_ar) == len(low_ar) == len(close_ar)
-        time_frame = os.environ.get('TIMEFRAME')
+        time_frame = self.json_config['timeframe']
         num_trades = 0
         split = len(date_time_ar)
         if time_frame == 'day':
@@ -42,26 +49,21 @@ class Main(object):
         elif time_frame == 'year':
             num_trades = 1500
             split = 525600
-        json_config = None
-        if os.environ.get('FROM_JSON_FILE'):
-            with open('src/data/config.json', 'r') as file:
-                json_config = file.read()
-        if os.environ.get('IS_RANDOM'):
+        if self.json_config['is_random']:
             rand_int = random.randint(0, len(open_ar) - split)
-            _backtest = backtest.PatternRecognition(self._data_class,
-                                                    list(date_time_ar[rand_int:rand_int + split]),
-                                                    list(open_ar[rand_int:rand_int + split]),
-                                                    list(high_ar[rand_int:rand_int + split]),
-                                                    list(low_ar[rand_int:rand_int + split]),
-                                                    list(close_ar[rand_int:rand_int + split]),
-                                                    json_config)
+            _back_test = backtest.PatternRecognition(self._data_class,
+                                                     list(date_time_ar[rand_int:rand_int + split]),
+                                                     list(open_ar[rand_int:rand_int + split]),
+                                                     list(high_ar[rand_int:rand_int + split]),
+                                                     list(low_ar[rand_int:rand_int + split]),
+                                                     list(close_ar[rand_int:rand_int + split]),
+                                                     self.json_config)
         else:
-            _backtest = backtest.PatternRecognition(self._data_class,
-                                                    list(date_time_ar[-split:]),
-                                                    list(open_ar[-split:]),
-                                                    list(high_ar[-split:]),
-                                                    list(low_ar[-split:]),
-                                                    list(close_ar[-split:]),
-                                                    json_config)
-        # Starts the recognition on the pattern and the live data from the api in the class
-        return _backtest.start(num_trades)
+            _back_test = backtest.PatternRecognition(self._data_class,
+                                                     list(date_time_ar[-split:]),
+                                                     list(open_ar[-split:]),
+                                                     list(high_ar[-split:]),
+                                                     list(low_ar[-split:]),
+                                                     list(close_ar[-split:]),
+                                                     self.json_config)
+        return _back_test.start(num_trades)

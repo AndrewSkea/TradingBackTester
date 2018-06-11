@@ -1,7 +1,9 @@
 import time
-from .methods import method, m7
+
 from terminaltables import AsciiTable
-from .enums.enums import Option
+
+from backtest import method
+from enums.enums import Option
 
 
 class PatternRecognition:
@@ -12,8 +14,7 @@ class PatternRecognition:
         self._low = low_price
         self._close = close_price
         self._open = open_price
-        self.methods = [method.CustomMethod(data_array_class, method_conf_json)] if \
-            method_conf_json is not None else [m7.CustomMethod(data_array_class)]
+        self.methods = [method.CustomMethod(data_array_class, method_conf_json)]
         self._bought_failed = 0
         self._bought_won = 0
         self._sold_failed = 0
