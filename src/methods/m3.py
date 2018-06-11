@@ -18,7 +18,7 @@ class CustomMethod:
     def update_data_arrays(self):
         self.rsi_method.update_data_arrays()
         self.bband.update_data_arrays()
-        self.ema.add_data_point(self.rsi_method.rsi[-1])
+        self.ema.update_data_arrays(self.rsi_method.rsi[-1])
 
     def get_result(self):
         if self.bband.has_broken_out() == Position.JUST_GONE_ABOVE and 77 < self.ema.get_ema_array()[-1]:

@@ -6,7 +6,7 @@ class Indicator:
     def __init__(self, data_array_class, time_limits):
         self._data = data_array_class
         self._time_limits = time_limits
-        self.valid_trading_time = False
+        self.is_valid_trading_time = False
         _print(self.__str__())
 
     @abstractmethod
@@ -14,46 +14,46 @@ class Indicator:
         pass
 
     def is_trading_time(self):
-        return self.valid_trading_time
+        return self.is_valid_trading_time
 
     def update_data_arrays(self):
-        self.valid_trading_time = self._data.time[-1].tm_wday <= 4 \
-                                  and any(tup[0] <= self._data.time[-1].tm_hour < tup[1] for tup in self._time_limits)
+        self.is_valid_trading_time = self._data.time[-1].tm_wday <= 4 \
+                                     and any(tup[0] <= self._data.time[-1].tm_hour < tup[1] for tup in self._time_limits)
 
     @abstractmethod
-    def has_broken_above(self):
+    def has_broken_above(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def has_broken_below(self):
+    def has_broken_below(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def has_come_back_in_from_above(self):
+    def has_come_back_in_from_above(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def has_come_back_in_from_below(self):
+    def has_come_back_in_from_below(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def has_moved_up_for(self):
+    def has_moved_up_for(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def has_moved_down_for(self):
+    def has_moved_down_for(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def is_above(self):
+    def is_above(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def is_below(self):
+    def is_below(self, *args, **kwargs):
         pass
 
     @abstractmethod
-    def is_inside(self):
+    def is_between(self, *args, **kwargs):
         pass
 
 

@@ -1,41 +1,52 @@
-from ..enums.enums import Position, Trend, Strength
 from . import sma
+from .indicator import Indicator
+import ast
 
 
-class AwesomeOscillator:
-    def __init__(self, constants):
-        self.constants = constants
-        self._sma_a = sma.SMA(34)
-        self._sma_b = sma.SMA(5)
+class AwesomeOscillator(Indicator):
+    def __init__(self, data_array_class, high_period, low_period, time_limits):
+        self._sma_a = sma.SMA(low_period)
+        self._sma_b = sma.SMA(high_period)
         self._awesome_oscillator = []
-        self._crossover_array = []
+        super().__init__(data_array_class, time_limits)
 
-    def add_data_point(self, low_value, high_value):
-        mid_point = (low_value + high_value) / 2
-        point1 = self._sma_a.add_data_point(mid_point)
-        point2 = self._sma_b.add_data_point(mid_point)
+    def update_data_arrays(self):
+        mid_point = (self._data.high[-1] + self._data.low[-1]) / 2
+        point1 = self._sma_a.update_data_arrays(mid_point)
+        point2 = self._sma_b.update_data_arrays(mid_point)
         self._awesome_oscillator.append(point2 - point1)
+        super().update_data_arrays()
 
-    def get_awesome_oscillator_array(self):
-        return self._awesome_oscillator
+    def __str__(self):
+        return "AWS_OSC\t\tlow_period: {}\thigh_period: {}\ttime: {}".\
+            format(self._sma_a.period, self._sma_b.period, self._time_limits)
 
-    def get_awesome_oscillator_result_for_nn(self):
-        return self._awesome_oscillator[-1]
+    def has_broken_above(self):
+        return True if self._awesome_oscillator[-1] > 0 > self._awesome_oscillator[-2] else False
 
-    def get_result(self):
-        """
-        This function returns a value if there has been a crossover
-        :return: None if no crossover, else direction of crossover
-        """
-        try:
-            if self._awesome_oscillator[-1] < 0 < self._awesome_oscillator[-2] or self._awesome_oscillator[-1] < self._awesome_oscillator[-2] < 0 < self._awesome_oscillator[-3]:
-                self._crossover_array.append(Position.BELOW)
-                return Option.SELL
-            elif self._awesome_oscillator[-1] > 0 > self._awesome_oscillator[-2] or self._awesome_oscillator[-1] > self._awesome_oscillator[-2] > 0 > self._awesome_oscillator[-3]:
-                self._crossover_array.append(Position.ABOVE)
-                return Option.BUY
-            else:
-                self._crossover_array.append(Position.EQUAL)
-                return Option.NO_TRADE
-        except IndexError:
-            return Option.NO_TRADE
+    def is_below(self):
+        return True if self._awesome_oscillator[-1] < 0 else False
+
+    def is_above(self, *args, **kwargs):
+        return True if self._awesome_oscillator[-1] > 0 else False
+
+    def has_broken_below(self, *args, **kwargs):
+        return True if self._awesome_oscillator[-1] < 0 < self._awesome_oscillator[-2] else False
+
+    def has_moved_down_for(self, num_candles):
+        temp = self._awesome_oscillator[-num_candles:]
+        return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
+
+    def has_moved_up_for(self, num_candles):
+        temp = self._awesome_oscillator[-num_candles:]
+        return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
+
+
+def get_class_instance(data_class, **kwargs):
+    high_period = kwargs.get('high_period', 34)
+    low_period = kwargs.get('low_period', 5)
+    time_limits = ast.literal_eval(kwargs.get('time_limits', [(17, 19)]))
+    return AwesomeOscillator(data_class,
+                             high_period=high_period,
+                             low_period=low_period,
+                             time_limits=time_limits)

@@ -14,7 +14,6 @@ class CCI(Indicator):
         self.mean_deviation_typical_price = []
         self.cci = []
         self._can_trade = False
-        self.valid_trading_time = False
         super().__init__(data_array_class, time_limits)
 
     def __str__(self):
@@ -24,7 +23,7 @@ class CCI(Indicator):
     def update_data_arrays(self):
         if len(self._data.close) >= self.period:
             self._can_trade = True
-            self.typical_price_sma.add_data_point(self._data.typical_price[-1])
+            self.typical_price_sma.update_data_arrays(self._data.typical_price[-1])
             self.mean_deviation_typical_price.append(mean_deviation.calculate_mean_deviation(
                 self._data.typical_price[-self.period:],
                 self.typical_price_sma.get_sma_array()[-1]))
@@ -32,14 +31,14 @@ class CCI(Indicator):
                             (0.015 * self.mean_deviation_typical_price[-1]))
         else:
             self._can_trade = False
-            self.typical_price_sma.add_data_point(np.NaN)
+            self.typical_price_sma.update_data_arrays(np.NaN)
             self.mean_deviation_typical_price.append(np.NaN)
             self.cci.append(np.NaN)
 
         super().update_data_arrays()
 
-    def has_moved_down_for(self):
-        temp = self.cci[-5:]
+    def has_moved_down_for(self, num_candles):
+        temp = self.cci[-num_candles:]
         return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
 
     def has_broken_above(self):
@@ -57,14 +56,14 @@ class CCI(Indicator):
     def is_above(self):
         return True if self.cci[-1] > self._upper_limit else False
 
-    def has_moved_up_for(self):
-        temp = self.cci[-5:]
+    def has_moved_up_for(self, num_candles):
+        temp = self.cci[-num_candles:]
         return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
 
     def is_below(self):
         return True if self.cci[-1] < self._lower_limit else False
 
-    def is_inside(self):
+    def is_between(self):
         return True if self._upper_limit > self.cci[-1] > self._lower_limit else False
 
 

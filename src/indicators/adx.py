@@ -1,10 +1,10 @@
-from ..enums.enums import Position, Trend, Strength
+import ast
+
+from .indicator import Indicator
 
 
-class ADX:
+class ADX(Indicator):
     def __init__(self, data_array_class, period, time_limits=[]):
-        self._time_limits = time_limits
-        self._data = data_array_class
         self.period = period
         self.true_range_1 = []
         self.plus_dm_1 = []
@@ -19,14 +19,10 @@ class ADX:
         self.dx = []
         self.adx = []
         self._can_trade = False
-        self.valid_trading_time = False
-        string = "ADX\t\tperiod: {}, time: {}".format(period, time_limits)
-        print(string)
-        with open('src/logdata/log.txt', 'a') as log_file:
-            log_file.write("\n" + string)
+        super().__init__(data_array_class, time_limits)
 
-    def is_trading_time(self):
-        return self.valid_trading_time
+    def __str__(self):
+        return "ADX\t\tperiod: {}, time: {}".format(self.period, self._time_limits)
 
     def update_data_arrays(self):
         if len(self._data.close) > 1:
@@ -57,30 +53,35 @@ class ADX:
                 self.dx.append(100 * (self.directional_indicator_diff[-1] / self.directional_indicator_sum[-1]))
                 self.adx.append(sum(self.dx[-self.period:]) / self.period)
 
-        self.valid_trading_time = self._data.time[-1].tm_wday <= 4 and any(
-            tup[0] <= self._data.time[-1].tm_hour < tup[1] for tup in self._time_limits)
+        super().update_data_arrays()
 
-    def get_strength_value(self):
-        if self._can_trade:
-            return self.adx[-1]
-        return 0
+    def is_between(self, lower, upper):
+        return True if lower < self.adx[-1] < upper else False
 
-    def get_strength_of_trend(self):
-        if self._can_trade:
-            if self.adx[-1] < 20:
-                return Strength.WEAK
-            elif 20 <= self.adx[-1] < 30:
-                return Strength.MILD
-            elif 30 <= self.adx[-1] < 50:
-                return Strength.STRONG
-            elif 50 <= self.adx[-1] < 100:
-                return Strength.VERY_STRONG
-        return 0
+    def has_broken_above(self, limit):
+        return True if self.adx[-1] > limit > self.adx[-2] else False
+
+    def has_broken_below(self, limit):
+        return True if self.adx[-1] < limit < self.adx[-2] else False
+
+    def is_above(self, limit):
+        return True if self.adx[-1] > limit else False
+
+    def is_below(self, limit):
+        return True if self.adx[-1] < limit else False
+
+    def has_moved_down_for(self, num_candles):
+        temp = self.adx[-num_candles:]
+        return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
+
+    def has_moved_up_for(self, num_candles):
+        temp = self.adx[-num_candles:]
+        return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
 
 
 def get_class_instance(data_class, **kwargs):
     period = kwargs.get('period', 20)
-    time_limits = kwargs.get('time_limits', [(17, 19)])
+    time_limits = ast.literal_eval(kwargs.get('time_limits', [(17, 19)]))
     return ADX(data_class,
                period=period,
                time_limits=time_limits)

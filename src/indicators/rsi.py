@@ -1,9 +1,11 @@
-from ..enums.enums import Position, Trend, Option
+import ast
+
+from .indicator import Indicator
 import numpy as np
 
 
-class RSI:
-    def __init__(self, data_array_class, period=None, upper_limit=None, lower_limit=None, time_limits=[(17, 19)]):
+class RSI(Indicator):
+    def __init__(self, data_array_class, period, upper_limit, lower_limit, time_limits):
         self._data = data_array_class
         self.period = period
         self._upper_limit = upper_limit
@@ -14,15 +16,11 @@ class RSI:
         self.relative_strength = []
         self.rsi = []
         self._can_trade = False
-        self.valid_trading_time = False
-        string = "RSI\t\tperiod: {}, upper: {}, lower: {}, time: {}".format(period, upper_limit,
-                                                                            lower_limit, time_limits)
-        print(string)
-        with open('src/logdata/log.txt', 'a') as log_file:
-            log_file.write("\n" + string)
+        super().__init__(data_array_class, time_limits)
 
-    def is_trading_time(self):
-        return self.valid_trading_time
+    def __str__(self):
+        return "RSI\t\tperiod: {}, upper: {}, lower: {}, time: {}".format(self.period, self._upper_limit,
+                                                                          self._lower_limit, self._time_limits)
 
     def update_data_arrays(self):
         if len(self._data.close) >= self.period + 2:
@@ -38,77 +36,44 @@ class RSI:
             self.avg_loss_of_close.append(np.NaN)
             self.relative_strength.append(np.NaN)
             self.rsi.append(np.NaN)
-        self.valid_trading_time = self._data.time[-1].tm_wday <= 4 \
-                                  and any(tup[0] <= self._data.time[-1].tm_hour < tup[1] for tup in self._time_limits)
 
-    def has_broken_out(self):
-        if self._can_trade:
-            if self.rsi[-1] > self._upper_limit > self.rsi[-2]:
-                return Position.JUST_GONE_ABOVE
-            elif self.rsi[-1] < self._lower_limit < self.rsi[-2]:
-                return Position.JUST_GONE_BELOW
-            else:
-                return False
-        else:
-            return None
+        super().update_data_arrays()
 
-    def has_come_back_in(self):
-        if self._can_trade:
-            if self.rsi[-1] < self._upper_limit < self.rsi[-2]:
-                return Position.JUST_REENTERED_FROM_ABOVE
-            elif self.rsi[-1] > self._lower_limit > self.rsi[-2]:
-                return Position.JUST_REENTERED_FROM_BELOW
-            else:
-                return False
-        else:
-            return None
+    def has_moved_down_for(self, num_candles):
+        temp = self.rsi[-num_candles:]
+        return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
 
-    def get_trend(self):
-        if self._can_trade:
-            if self.rsi[-1] > self.rsi[-2]:
-                return Trend.UP
-            elif self.rsi[-1] < self.rsi[-2]:
-                return Trend.DOWN
-            else:
-                return Trend.STRAIGHT
-        else:
-            return None
+    def has_broken_above(self):
+        return True if self.rsi[-1] > self._upper_limit > self.rsi[-2] else False
 
-    def moving_in_direction_for(self, n=5):
-        if self._can_trade:
-            temp = self.rsi[-n:]
-            if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]):
-                return Trend.UP
-            elif all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]):
-                return Trend.DOWN
-            else:
-                return Trend.STRAIGHT
-        else:
-            return None
+    def has_come_back_in_from_below(self):
+        return True if self.rsi[-1] > self._lower_limit > self.rsi[-2] else False
 
-    def is_outside(self):
-        if self._can_trade:
-            if self.rsi[-1] > self._upper_limit:
-                return Position.ABOVE
-            elif self.rsi[-1] < self._lower_limit:
-                return Position.BELOW
-            else:
-                return False
-        else:
-            return None
+    def has_come_back_in_from_above(self):
+        return True if self.rsi[-1] < self._upper_limit < self.rsi[-2] else False
 
-    def is_inside(self):
-        if self._can_trade:
-            return True if self._upper_limit > self.rsi[-1] > self._lower_limit else False
-        else:
-            return None
+    def has_broken_below(self):
+        return True if self.rsi[-1] < self._lower_limit < self.rsi[-2] else False
+
+    def is_above(self):
+        return True if self.rsi[-1] > self._upper_limit else False
+
+    def has_moved_up_for(self, num_candles):
+        temp = self.rsi[-num_candles:]
+        return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
+
+    def is_below(self):
+        return True if self.rsi[-1] < self._lower_limit else False
+
+    def is_between(self):
+        return True if self._upper_limit > self.rsi[-1] > self._lower_limit else False
 
 
 def get_class_instance(data_class, **kwargs):
     upper_limit = kwargs.get('upper_limit', 70)
     lower_limit = kwargs.get('lower_limit', 30)
     period = kwargs.get('period', 20)
-    time_limits = kwargs.get('time_limits', [(17, 19)])
+    time_limits = ast.literal_eval(kwargs.get('time_limits', [(17, 19)]))
     return RSI(data_class,
                upper_limit=upper_limit,
                lower_limit=lower_limit,

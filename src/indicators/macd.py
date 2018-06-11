@@ -20,8 +20,8 @@ class MACD:
     def add_data_point(self, close_value):
         try:
             self._is_new_value = False
-            ema_a_last_value = self._ema_a.add_data_point(close_value)
-            ema_b_last_value = self._ema_b.add_data_point(close_value)
+            ema_a_last_value = self._ema_a.update_data_arrays(close_value)
+            ema_b_last_value = self._ema_b.update_data_arrays(close_value)
             macd_last_value = ema_b_last_value - ema_a_last_value
             self._macd_array.append(macd_last_value)
             # Get the second last value as last value has just been appended to the macd array. calculate the signal line

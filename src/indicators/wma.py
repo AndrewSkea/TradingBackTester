@@ -1,22 +1,43 @@
-class WMA:
-    def __init__(self, period):
+import ast
+
+from .indicator import Indicator
+
+
+class WMA(Indicator):
+    def __init__(self, period, data_array_class=None, time_limits=None):
         self._all_data = []
-        self._wma_values_array = []
-        self._period = period
+        self.wma = []
+        self.period = period
+        super().__init__(data_array_class, time_limits)
 
-    def add_data_point(self, point):
+    def update_data_arrays(self, point=None):
+        point = self._data.close[-1] if point is None else point
         self._all_data.append(point)
-        division_num = sum(range(self._period + 1))
-        try:
+        if len(self._all_data) > self.period:
+            division_num = sum(range(self.period + 1))
             temp_array = []
-            for i in range(self._period):
-                temp_array.append((self._all_data[-(self._period - i)] * (self._period - i))/division_num)
-
-            []
-            self._wma_values_array.append(sum(temp_array))
-            return self._wma_values_array[-1]
-        except IndexError:
-            self._wma_values_array.append(point)
+            for i in range(self.period):
+                temp_array.append((self._all_data[-(self.period - i)] * (self.period - i)) / division_num)
+            self.wma.append(sum(temp_array))
+            return self.wma[-1]
 
     def get_wma_array(self):
-        return self._wma_values_array
+        return self.wma
+
+    def __str__(self):
+        return "WMA\t\tperiod: {}\ttime: {}".format(self.period, self._time_limits)
+
+    def has_moved_down_for(self, num_candles):
+        temp = self.wma[-num_candles:]
+        return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
+
+    def has_moved_up_for(self, num_candles):
+        temp = self.wma[-num_candles:]
+        return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
+
+def get_class_instance(data_class, **kwargs):
+    period = kwargs.get('period', 20)
+    time_limits = ast.literal_eval(kwargs.get('time_limits', [(17, 19)]))
+    return WMA(data_array_class=data_class,
+               period=period,
+               time_limits=time_limits)
