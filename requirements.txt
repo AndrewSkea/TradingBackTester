@@ -3,3 +3,4 @@ djangorestframework
 request
 numpy
 terminaltables
+pandas
