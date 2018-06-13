@@ -1,3 +1,7 @@
+echo "GIT PULL"
+git reset --hard
+git pull
+
 echo "DOCKER RM"
 sudo docker rm backtest-api
 
