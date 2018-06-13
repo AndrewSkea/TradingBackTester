@@ -1,5 +1,8 @@
 #!/bin/sh
 
+echo "Flush database"
+python manage.py flush
+
 echo "Create database migration files"
 python manage.py makemigrations
 
