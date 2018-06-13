@@ -5,7 +5,8 @@ git reset --hard
 git pull
 
 echo "DOCKER RM"
-sudo docker rm backtest-api
+sudo docker stop backtest-api
+sudo docker rm -f backtest-api
 
 echo "DOCKER BUILD"
 sudo docker build -f Dockerfile -t backtest-api:v0 .
