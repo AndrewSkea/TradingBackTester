@@ -18,3 +18,7 @@ sudo docker run \
     -v /etc/localtime:/etc/localtime:ro \
     --name=backtest-api \
     backtest-api:v0
+
+echo "RUNNING LOGS"
+sudo docker logs -f backtest-api
+
