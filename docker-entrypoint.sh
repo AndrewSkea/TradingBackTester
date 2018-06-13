@@ -1,3 +1,5 @@
+#!/bin/sh
+
 echo "Create database migration files"
 python manage.py makemigrations
 

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 echo "GIT PULL"
 git reset --hard
 git pull
@@ -21,4 +23,3 @@ sudo docker run -it \
 
 echo "RUNNING LOGS"
 sudo docker logs -f backtest-api
-
