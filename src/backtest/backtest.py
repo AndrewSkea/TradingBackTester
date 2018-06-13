@@ -2,8 +2,8 @@ import time
 
 from terminaltables import AsciiTable
 
-from backtest import method
-from enums.enums import Option
+from . import method
+from ..enums.enums import Option
 
 
 class PatternRecognition:

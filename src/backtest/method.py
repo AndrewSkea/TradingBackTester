@@ -1,7 +1,7 @@
 import importlib
 import json
 
-from enums.enums import Option
+from ..enums.enums import Option
 
 
 class CustomMethod:

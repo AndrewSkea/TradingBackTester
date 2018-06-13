@@ -1,12 +1,11 @@
-import os
 import random
 import time
 import logging
 
 import pandas as pd
 
-from indicators.data_arrays import DataArrays
-from src.backtest import backtest
+from .indicators.data_arrays import DataArrays
+from .backtest import backtest
 
 
 class Main(object):

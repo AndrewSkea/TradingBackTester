@@ -1,4 +1,4 @@
-from enums import enums
+from ..enums import enums
 
 
 def percent_change(_start_point, _current_point):
