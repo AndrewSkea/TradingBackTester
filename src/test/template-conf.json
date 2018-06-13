@@ -1,0 +1,14 @@
+{
+  "timeframe": "day",               // REQUIRED Options (str): day, week, month, 3_months, 6_months, year
+  "is_random": "True",              // REQUIRED True or False
+  "indicator": {                    // REQUIRED (minimum 1) Options: cci, rsi, stochastic_oscillator, bollingerbands, adx
+    "parameter_1": 24,              // REQUIRED - SEE BELOW FOR INDIVIDUAL ONES
+    "parameter_2": 220,             //      There could be numerous parameters (changes for each indicator)
+    "parameter_3": 220,
+    "time_limits": "[(13, 21)]",    // Has to have this parameter, no matter what indicator
+    "signals": {                    // Has to have signals
+      "BUY": ["has_broken_below", "has_moved_down_for"],  // There must be at least one for BUY, can be several
+      "SELL": ["has_broken_above", "has_moved_up_for"]    // There must be at least one for SELL, can be several
+    }
+  }
+}

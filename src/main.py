@@ -1,7 +1,7 @@
 import os
 import random
 import time
-import argparse
+import logging
 
 import pandas as pd
 
@@ -11,26 +11,20 @@ from src.backtest import backtest
 
 class Main(object):
     def __init__(self):
-        parser = argparse.ArgumentParser(description='Process fields')
-        parser.add_argument('-js', '--json-str', "json_config_str", type=str, help='json (str) config', default="")
-        args = parser.parse_args()
-        if args.json_config_str != "":
-            self.json_config = args.json_config_str
-        elif os.environ.get('FROM_JSON_FILE'):
-            with open('src/data/config.json', 'r') as file:
-                self.json_config = file.read()
-        else:
-            raise Exception("Need JSON str or Dict parameter for method configuration")
         self._data_class = DataArrays(period=20)
-
-    def start(self):
         data_arrays = pd.read_csv('src/data/eurusd_m1.csv', engine='python')
-        date_ar, time_ar, open_ar, high_ar, low_ar, close_ar = zip(*data_arrays.as_matrix())
-        date_time_ar = [time.strptime("{} {}".format(date_ar[i], time_ar[i]), "%m/%d/%Y %H:%M:%S")
-                        for i in range(len(date_ar))]
-        time_frame = self.json_config['timeframe']
+        date_ar, self.time_ar, self.open_ar, self.high_ar, self.low_ar, self.close_ar = zip(*data_arrays.as_matrix())
+        self.date_time_ar = [time.strptime("{} {}".format(date_ar[i], self.time_ar[i]), "%m/%d/%Y %H:%M:%S")
+                             for i in range(len(date_ar))]
+
+    def start(self, json_config=None):
+        if json_config is None:
+            logging.warning("Need JSON str or Dict parameter for method configuration, pulling from file")
+            with open('src/data/config.json', 'r') as file:
+                json_config = file.read()
+        time_frame = json_config['timeframe']
         num_trades = 0
-        split = len(date_time_ar)
+        split = len(self.date_time_ar)
         if time_frame == 'day':
             num_trades = 5
             split = 1440
@@ -49,21 +43,21 @@ class Main(object):
         elif time_frame == 'year':
             num_trades = 1500
             split = 525600
-        if self.json_config['is_random']:
-            rand_int = random.randint(0, len(open_ar) - split)
+        if json_config['is_random']:
+            rand_int = random.randint(0, len(self.open_ar) - split)
             _back_test = backtest.PatternRecognition(self._data_class,
-                                                     list(date_time_ar[rand_int:rand_int + split]),
-                                                     list(open_ar[rand_int:rand_int + split]),
-                                                     list(high_ar[rand_int:rand_int + split]),
-                                                     list(low_ar[rand_int:rand_int + split]),
-                                                     list(close_ar[rand_int:rand_int + split]),
-                                                     self.json_config)
+                                                     list(self.date_time_ar[rand_int:rand_int + split]),
+                                                     list(self.open_ar[rand_int:rand_int + split]),
+                                                     list(self.high_ar[rand_int:rand_int + split]),
+                                                     list(self.low_ar[rand_int:rand_int + split]),
+                                                     list(self.close_ar[rand_int:rand_int + split]),
+                                                     json_config)
         else:
             _back_test = backtest.PatternRecognition(self._data_class,
-                                                     list(date_time_ar[-split:]),
-                                                     list(open_ar[-split:]),
-                                                     list(high_ar[-split:]),
-                                                     list(low_ar[-split:]),
-                                                     list(close_ar[-split:]),
-                                                     self.json_config)
+                                                     list(self.date_time_ar[-split:]),
+                                                     list(self.open_ar[-split:]),
+                                                     list(self.high_ar[-split:]),
+                                                     list(self.low_ar[-split:]),
+                                                     list(self.close_ar[-split:]),
+                                                     json_config)
         return _back_test.start(num_trades)
