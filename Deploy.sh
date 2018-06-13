@@ -12,7 +12,7 @@ echo "DOCKER RMI"
 sudo docker rmi $(sudo docker images -q -f "dangling=true")
 
 echo "DOCKER RUN"
-sudo docker run \
+sudo docker run -it \
     -d \
     -p 8000:8000 \
     -v /etc/localtime:/etc/localtime:ro \

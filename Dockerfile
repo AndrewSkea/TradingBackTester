@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.6.4-jessie
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /source
 WORKDIR /source
