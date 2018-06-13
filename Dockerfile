@@ -7,6 +7,8 @@ ADD requirements.txt /source/requirements.txt
 RUN pip install -r /source/requirements.txt
 ADD . /source
 RUN chmod +x /source/docker-entrypoint.sh
-RUN dos2unix /source//docker-entrypoint.sh
+RUN dos2unix /source/docker-entrypoint.sh
+RUN rm -f /source/db.sqlite3
+RUN rm -f -R /source/api/migrations
 EXPOSE 8000
 CMD ["/source/docker-entrypoint.sh"]
