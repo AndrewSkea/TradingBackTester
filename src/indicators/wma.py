@@ -27,11 +27,13 @@ class WMA(Indicator):
     def __str__(self):
         return "WMA\t\tperiod: {}\ttime: {}".format(self.period, self._time_limits)
 
-    def has_moved_down_for(self, num_candles):
+    def has_moved_down_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self.wma[-num_candles:]
         return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
 
-    def has_moved_up_for(self, num_candles):
+    def has_moved_up_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self.wma[-num_candles:]
         return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
 

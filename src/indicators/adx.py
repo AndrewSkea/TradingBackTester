@@ -55,26 +55,34 @@ class ADX(Indicator):
 
         super().update_data_arrays()
 
-    def is_between(self, lower, upper):
+    def is_between(self, **kwargs):
+        lower = kwargs.get('lower', 20)
+        upper = kwargs.get('upper', 80)
         return True if lower < self.adx[-1] < upper else False
 
-    def has_broken_above(self, limit):
+    def has_broken_above(self, **kwargs):
+        limit = kwargs.get('limit', 80)
         return True if self.adx[-1] > limit > self.adx[-2] else False
 
-    def has_broken_below(self, limit):
+    def has_broken_below(self, **kwargs):
+        limit = kwargs.get('limit', 20)
         return True if self.adx[-1] < limit < self.adx[-2] else False
 
-    def is_above(self, limit):
+    def is_above(self, **kwargs):
+        limit = kwargs.get('limit', 80)
         return True if self.adx[-1] > limit else False
 
-    def is_below(self, limit):
+    def is_below(self, **kwargs):
+        limit = kwargs.get('limit', 20)
         return True if self.adx[-1] < limit else False
 
-    def has_moved_down_for(self, num_candles):
+    def has_moved_down_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self.adx[-num_candles:]
         return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
 
-    def has_moved_up_for(self, num_candles):
+    def has_moved_up_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self.adx[-num_candles:]
         return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
 

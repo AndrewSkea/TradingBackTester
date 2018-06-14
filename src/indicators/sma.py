@@ -7,6 +7,8 @@ from .indicator import Indicator
 
 class SMA(Indicator):
     def __init__(self, period, data_array_class=None, time_limits=None):
+        self._data = data_array_class
+        self._time_limits = time_limits
         self._all_data = []
         self.sma = []
         self.period = period
@@ -27,11 +29,13 @@ class SMA(Indicator):
     def get_sma_array(self):
         return self.sma
 
-    def has_moved_down_for(self, num_candles):
+    def has_moved_down_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self.sma[-num_candles:]
         return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
 
-    def has_moved_up_for(self, num_candles):
+    def has_moved_up_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self.sma[-num_candles:]
         return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
 

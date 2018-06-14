@@ -1,14 +1,21 @@
 {
   "timeframe": "day",
   "is_random": "True",
-  "cci": {
-    "period": 24,
-    "upper_limit": 220,
-    "lower_limit": 220,
-    "time_limits": "[(13, 21)]",
-    "signals": {
-      "BUY": ["has_broken_below", "has_moved_down_for"],
-      "SELL": ["has_broken_above", "has_moved_up_for"]
+  "indicators": {
+    "stochastic_oscillator": {
+      "k_period": 34,
+      "d_period": 5,
+      "upper_limit": 80,
+      "lower_limit": 20,
+      "time_limits": "[(13, 21)]",
+      "signals": {
+        "BUY": {"has_broken_below": {"upper_limit": "" },
+          "has_moved_down_for": {"num_candles": 5 }
+        },
+        "SELL": {"has_broken_above": {"upper_limit": "" },
+          "has_moved_up_for": {"num_candles": 5 }
+        }
+      }
     }
   }
 }

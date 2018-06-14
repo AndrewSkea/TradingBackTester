@@ -21,23 +21,25 @@ class AwesomeOscillator(Indicator):
         return "AWS_OSC\t\tlow_period: {}\thigh_period: {}\ttime: {}".\
             format(self._sma_a.period, self._sma_b.period, self._time_limits)
 
-    def has_broken_above(self):
+    def has_broken_above(self, **kwargs):
         return True if self._awesome_oscillator[-1] > 0 > self._awesome_oscillator[-2] else False
 
-    def is_below(self):
+    def is_below(self, **kwargs):
         return True if self._awesome_oscillator[-1] < 0 else False
 
-    def is_above(self, *args, **kwargs):
+    def is_above(self, **kwargs):
         return True if self._awesome_oscillator[-1] > 0 else False
 
-    def has_broken_below(self, *args, **kwargs):
+    def has_broken_below(self, **kwargs):
         return True if self._awesome_oscillator[-1] < 0 < self._awesome_oscillator[-2] else False
 
-    def has_moved_down_for(self, num_candles):
+    def has_moved_down_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self._awesome_oscillator[-num_candles:]
         return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
 
-    def has_moved_up_for(self, num_candles):
+    def has_moved_up_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self._awesome_oscillator[-num_candles:]
         return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
 

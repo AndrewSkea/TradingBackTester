@@ -1,6 +1,4 @@
 import importlib
-import json
-
 from ..enums.enums import Option
 
 
@@ -13,22 +11,21 @@ class CustomMethod:
         :param data_array_class: Data array class
         :param json_config: Json config detailing indicators and signals used
         """
-        json_dict = json.loads(json_config)
-        self.indicator_list = []
-        self.signals_list = []
-        for key in json_dict:
-            self.signals_list.append(json_dict[key]['signals'])
-            self.indicator_list.append(importlib.import_module('indicators.' + key).
-                                       get_class_instance(data_array_class, **json_dict[key]))
+        self.indicator_list = {}
+        self.signals_list = {}
+        for key in json_config['indicators']:
+            self.signals_list[key] = json_config['indicators'][key]['signals']
+            self.indicator_list[key] = importlib.import_module('indicators.' + str(key)).get_class_instance(
+                data_array_class, **json_config['indicators'][key])
 
     def update_data_arrays(self):
-        [indicator.update_data_arrays() for indicator in self.indicator_list]
+        [indicator.update_data_arrays() for indicator in self.indicator_list.values()]
 
     def get_result(self):
-        if any([ind.is_trading_time() for ind in self.indicator_list]):
-            for i in range(len(self.indicator_list)):
-                if all([getattr(self.indicator_list[i], signal)() for signal in self.signals_list[i]['BUY']]):
+        for key, value in self.indicator_list.items():
+            if value.is_valid_trading_time:
+                if all([getattr(value, signal)(**params) for signal, params in self.signals_list[key]['BUY'].items()]):
                     return Option.BUY
-                elif all([getattr(self.indicator_list[i], signal)() for signal in self.signals_list[i]['SELL']]):
+                elif all([getattr(value, signal)(**params) for signal, params in self.signals_list[key]['SELL'].items()]):
                     return Option.SELL
         return Option.NO_TRADE

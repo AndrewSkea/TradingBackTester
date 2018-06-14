@@ -1,5 +1,5 @@
 from .indicator import Indicator
-from ..functions import mean_deviation
+from src.functions import mean_deviation
 from .sma import SMA
 import numpy as np
 import ast
@@ -34,36 +34,37 @@ class CCI(Indicator):
             self.typical_price_sma.update_data_arrays(np.NaN)
             self.mean_deviation_typical_price.append(np.NaN)
             self.cci.append(np.NaN)
-
         super().update_data_arrays()
 
-    def has_moved_down_for(self, num_candles):
+    def has_moved_down_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self.cci[-num_candles:]
         return True if all([temp[x + 1] < temp[x] for x in range(len(temp) - 1)]) else False
 
-    def has_broken_above(self):
+    def has_broken_above(self, **kwargs):
         return True if self.cci[-1] > self._upper_limit > self.cci[-2] else False
 
-    def has_come_back_in_from_below(self):
+    def has_come_back_in_from_below(self, **kwargs):
         return True if self.cci[-1] > self._lower_limit > self.cci[-2] else False
 
-    def has_come_back_in_from_above(self):
+    def has_come_back_in_from_above(self, **kwargs):
         return True if self.cci[-1] < self._upper_limit < self.cci[-2] else False
 
-    def has_broken_below(self):
+    def has_broken_below(self, **kwargs):
         return True if self.cci[-1] < self._lower_limit < self.cci[-2] else False
 
-    def is_above(self):
+    def is_above(self, **kwargs):
         return True if self.cci[-1] > self._upper_limit else False
 
-    def has_moved_up_for(self, num_candles):
+    def has_moved_up_for(self, **kwargs):
+        num_candles = kwargs.get('num_candles', 5)
         temp = self.cci[-num_candles:]
         return True if all([temp[x + 1] > temp[x] for x in range(len(temp) - 1)]) else False
 
-    def is_below(self):
+    def is_below(self, **kwargs):
         return True if self.cci[-1] < self._lower_limit else False
 
-    def is_between(self):
+    def is_between(self, **kwargs):
         return True if self._upper_limit > self.cci[-1] > self._lower_limit else False
 
 

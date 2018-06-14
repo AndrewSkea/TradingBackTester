@@ -18,7 +18,6 @@ class DataArrays:
         self.gain_of_close = []
         self.loss_of_close = []
         self.typical_price = []
-        # MA arrays
         self.close_sma = []
         self.close_ema = []
         self.close_wma = []

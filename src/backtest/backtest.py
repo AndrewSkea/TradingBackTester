@@ -64,7 +64,7 @@ class PatternRecognition:
     def start(self, num_trades):
         start_time = time.time()
         period = 1
-        for index in range(len(self._close) - period):
+        for index in range(10, len(self._close) - period):
             self.recognition(time_value=self._time[index],
                              close_value=self._close[index],
                              open_value=self._open[index],
@@ -102,17 +102,17 @@ class PatternRecognition:
                          str(per_win) + "%"]]).table)
                 log_file.write(log_str)
                 print(log_str)
-            return {
-                "time": int(time.time() - start_time),
-                "total": total,
-                "num_bought_win": self._bought_won,
-                "num_bought_lost": self._bought_failed,
-                "num_sold_win": self._sold_won,
-                "num_sold_lost": self._sold_failed,
-                "profit": int(self._money - self._starting_money),
-                "linear_profit": int(self._linear__money),
-                "lowest_money": int(self._lowest_money)
-            }
         except ZeroDivisionError:
             print("Divided by zero")
-            return None
+        return {
+            "time_taken": int(time.time() - start_time),
+            "num_bought_won": self._bought_won,
+            "num_bought_failed": self._bought_failed,
+            "num_sold_won": self._sold_won,
+            "num_sold_failed": self._sold_failed,
+            "exp_profit": int(self._money - self._starting_money),
+            "linear_profit": int(self._linear__money),
+            "lowest_balance": int(self._lowest_money),
+            "starting_balance": int(self._starting_money)
+        }
+
