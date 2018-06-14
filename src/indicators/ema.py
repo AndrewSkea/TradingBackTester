@@ -23,7 +23,7 @@ class EMA(Indicator):
                 self.ema.append(point)
             return self.ema[-1]
         return None
-    super().update_data_arrays()
+        super().update_data_arrays()
 
     def get_ema_array(self):
         return self.ema if len(self.ema) > 1 else []

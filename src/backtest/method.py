@@ -6,11 +6,9 @@ from ..indicators.adx import ADX
 from ..indicators.bollingerbands import BollingerBands
 from ..indicators.awesome_oscillator import AwesomeOscillator
 from ..indicators.ema import EMA
-from ..indicators.macd import MACD
 from ..indicators.rsi import RSI
 from ..indicators.sma import SMA	
 from ..indicators.stochastic_oscillator import StochasticOscillator
-from ..indicators.typical_price import TypicalPrice
 from ..indicators.wma import WMA
 
 class CustomMethod:
