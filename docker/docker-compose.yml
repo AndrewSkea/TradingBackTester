@@ -1,10 +1,40 @@
 version: '3'
 
 services:
-  web:
+  backtest-api:
     build: .
     command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
       - "8000:8000"
+    depends_on:
+      - postgres
+      
+  nginx:
+    image: nginx
+    volumes:
+     - ../nginx/conf/:/etc/nginx/conf.d/
+    ports:
+     - "80:80"
+     - "443:443"
+    environment:
+     - NGINX_HOST=localhost
+     - NGINX_PORT=80
+     
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: Admin4Backtest
+      
+  jenkins:
+    image: jenkins
+    volumes:
+      - ../jenkins:/var/jenkins_home
+    ports:
+      - 8090:8080
+      - 50000:50000
+    
+
+    
