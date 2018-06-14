@@ -15,8 +15,8 @@ class CustomMethod:
         self.signals_list = {}
         for key in json_config['indicators']:
             self.signals_list[key] = json_config['indicators'][key]['signals']
-            self.indicator_list[key] = importlib.import_module('indicators.' + str(key)).get_class_instance(
-                data_array_class, **json_config['indicators'][key])
+            self.indicator_list[key] = importlib.import_module('..indicators.' + str(key), package='src.indicators').\
+                get_class_instance(data_array_class, **json_config['indicators'][key])
 
     def update_data_arrays(self):
         [indicator.update_data_arrays() for indicator in self.indicator_list.values()]
