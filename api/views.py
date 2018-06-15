@@ -3,6 +3,7 @@ from .models import Backtest
 from src import main
 import json
 from django.http import HttpResponse
+from django.http import JsonResponse
 
 
 class BacktestView(APIView):
@@ -37,7 +38,7 @@ class BacktestView(APIView):
                                 lowest_balance=json_output['lowest_balance'],
                                 starting_balance=json_output['starting_balance']
                                 )
-        return HttpResponse(status=201)
+        return JsonResponse(json_output)
 
     def get(self, request):
         user_id = request.GET.get('user_id')
