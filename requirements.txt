@@ -1,0 +1,7 @@
+django
+djangorestframework
+request
+numpy
+terminaltables
+pandas
+django-rest-swagger

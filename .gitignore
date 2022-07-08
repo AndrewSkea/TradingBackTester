@@ -24,6 +24,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.gitignore
+profiler_stats
+log/*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -156,3 +159,6 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+*/log.txt
+db.sqlite3

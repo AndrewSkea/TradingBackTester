@@ -1,0 +1,131 @@
+{
+  "timeframe": "day",
+  "is_random": "True",
+  "indicators": {
+    "stochastic_oscillator": {
+      "k_period": 34,
+      "d_period": 5,
+      "upper_limit": 80,
+      "lower_limit": 20,
+      "time_limits": "[(13, 21)]",
+      "signals": {
+        "BUY": {"has_broken_below": {"upper_limit": "" },
+          "has_moved_down_for": {"num_candles": 5 }
+        },
+        "SELL": {"has_broken_above": {"upper_limit": "" },
+          "has_moved_up_for": {"num_candles": 5 }
+        }
+      }
+    },
+    "rsi": {
+    "period": 24,
+    "upper_limit": 220,
+    "lower_limit": 220,
+    "time_limits": "[(13, 21)]",
+    "signals": {
+        "BUY": {"has_broken_below": {"upper_limit": "" },
+          "has_moved_down_for": {"num_candles": 5 }
+        },
+        "SELL": {"has_broken_above": {"upper_limit": "" },
+          "has_moved_up_for": {"num_candles": 5 }
+       }
+  },
+  "adx": {
+    "period": 24,
+    "time_limits": "[(13, 21)]",
+    "signals": {
+        "BUY": {"has_broken_below": {"upper_limit": "" },
+          "has_moved_down_for": {"num_candles": 5 }
+        },
+        "SELL": {"has_broken_above": {"upper_limit": "" },
+          "has_moved_up_for": {"num_candles": 5 }
+        }
+  },
+  "bollingerbands": {
+    "period": 24,
+    "upper_stdev_multiplier": 2,
+    "lower_stdev_multiplier": 2,
+    "time_limits": "[(13, 21)]",
+    "signals": {
+        "BUY": {"has_broken_below": {"upper_limit": "" },
+          "has_moved_down_for": {"num_candles": 5 }
+        },
+        "SELL": {"has_broken_above": {"upper_limit": "" },
+          "has_moved_up_for": {"num_candles": 5 }
+        }
+  },
+  "stochastic_oscillator": {
+    "k_period": 34,
+    "d_period": 5,
+    "upper_limit": 2,
+    "lower_limit": 2,
+    "time_limits": "[(13, 21)]",
+    "signals": {
+        "BUY": {"has_broken_below": {"upper_limit": "" },
+          "has_moved_down_for": {"num_candles": 5 }
+        },
+        "SELL": {"has_broken_above": {"upper_limit": "" },
+          "has_moved_up_for": {"num_candles": 5 }
+    }
+  }
+  }
+}
+
+/*
+
+// There must be at least one indicator filled out and the first two fields (timeframe and is_random)
+// Each indicator has a different list of possible signals for its BUY and SELL:
+
+// CCI
+Signal Options for BUY or SELL: [ has_moved_down_for("num_candles": integer_parameter),
+                                  has_broken_above,
+                                  has_come_back_in_from_below,
+                                  has_come_back_in_from_above,
+                                  has_broken_below,
+                                  is_above,
+                                  has_moved_up_for("num_candles": integer_parameter),
+                                  is_below,
+                                  is_between]
+
+// RSI
+Signal Options for BUY or SELL: [ has_moved_down_for("num_candles": integer_parameter),
+                                  has_broken_above,
+                                  has_come_back_in_from_below,
+                                  has_come_back_in_from_above,
+                                  has_broken_below,
+                                  is_above,
+                                  has_moved_up_for("num_candles": integer_parameter),
+                                  is_below,
+                                  is_between]
+
+// ADX
+Signal Options for BUY or SELL: [is_between ("lower_limit": int_param, "upper_limit": int_param),
+                                has_broken_above("limit": int_param),
+                                has_broken_below("limit": int_param),
+                                is_above("limit": int_param),
+                                is_below("limit": int_param),
+                                has_moved_down_for("num_candles": int_param),
+                                has_moved_up_for("num_candles": int_param)]
+
+// bollingerbands
+Signal Options for BUY or SELL: [has_broken_above,
+                                has_come_back_in_from_above,
+                                is_below,
+                                is_between,
+                                has_come_back_in_from_below,
+                                is_above,
+                                has_broken_below,
+                                has_moved_down_for("num_candles": int_param),
+                                has_moved_up_for("num_candles": int_param)]
+
+// stochastic_oscillator
+Signal Options for BUY or SELL: [has_broken_above,
+                                  has_come_back_in_from_above,
+                                  is_below,
+                                  is_between,
+                                  has_come_back_in_from_below,
+                                  is_above,
+                                  has_broken_below,
+                                  has_moved_down_for("num_candles": int_param),
+                                  has_moved_up_for("num_candles": int_param)]
+*/
